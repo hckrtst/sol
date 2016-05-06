@@ -6,10 +6,10 @@ is written or even before doing any software design documentation.
 # Stories
 
 ## 1
-!()[https://raw.githubusercontent.com/hckrtst/sol/master/design/images/story1.1.jpg]
+![](https://raw.githubusercontent.com/hckrtst/sol/master/design/images/story1.1.jpg)
 
 ## 2
-!()[https://raw.githubusercontent.com/hckrtst/sol/master/design/images/story2.1.jpg]
+![](https://raw.githubusercontent.com/hckrtst/sol/master/design/images/story2.1.jpg)
 
 ## 3
-!()[https://raw.githubusercontent.com/hckrtst/sol/master/design/images/story2.2.jpg]
+![](https://raw.githubusercontent.com/hckrtst/sol/master/design/images/story2.2.jpg)
