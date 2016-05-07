@@ -1,0 +1,53 @@
+@startuml
+
+title Sol - Class Diagram
+
+
+class MainActivity {
+}
+
+
+class SettingsActivity {
+}
+
+
+class MainService{
+}
+
+
+class DataIntentService {
+}
+
+class BootReceiver {
+}
+
+class ConnectivityReceiver {
+}
+
+class StorageManager {
+}
+
+class Constants {
+}
+
+note top of MainService
+Runs in a separate thread
+and is the core service
+which creates receivers etc.
+endnote
+
+note top of StorageManager
+Singleton that abstracts access to stored
+sunrise, sunset times and reminder
+times.
+Provides synchronized static methods.
+endnote
+
+note top of DataIntentService
+Gets the data from the sunsetsunrise
+service in a separate thread.
+Handles all the HTTP transactions.
+endnote
+
+
+@enduml
