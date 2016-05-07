@@ -10,8 +10,16 @@
     tools:showIn="@layout/activity_main">
 
     <TextView
+        android:id="@+id/sunrise_time_text_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!" />
+        android:text="@string/main_activity_sunrise_time_placeholder"/>
+
+    <TextView
+        android:id="@+id/sunset_time_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/main_activity_sunset_time_placeholder"/>
+
 
 </RelativeLayout>
