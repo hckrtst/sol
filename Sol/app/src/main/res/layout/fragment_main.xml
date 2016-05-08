@@ -9,17 +9,47 @@
     tools:context="com.hellosanket.sol.MainActivityFragment"
     tools:showIn="@layout/activity_main">
 
-    <TextView
-        android:id="@+id/sunrise_time_text_view"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/main_activity_sunrise_time_placeholder"/>
+        android:id="@+id/sunrise_linear_layout">
+        <TextView
+            android:id="@+id/sunrise_time_text_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textAlignment="center"
+            android:text="@string/main_activity_sunrise_time_placeholder"/>
 
-    <TextView
-        android:id="@+id/sunset_time_text_view"
-        android:layout_width="wrap_content"
+
+        <ToggleButton
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/sunrise_reminder_toggle_btn"
+            android:layout_weight="2"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/main_activity_sunset_time_placeholder"/>
+        android:layout_below="@id/sunrise_linear_layout">
+        <TextView
+            android:id="@+id/sunset_time_text_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textAlignment="center"
+            android:text="@string/main_activity_sunrise_time_placeholder"/>
+        <ToggleButton
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/sunset_reminder_toggle_btn"
+            android:layout_weight="2"/>
+
+    </LinearLayout>
+
+
 
 
 </RelativeLayout>
