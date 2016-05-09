@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">Sol</string>
     <string name="action_settings">Settings</string>
-    <string name="main_activity_sunrise_time_placeholder">No Sunrise Reminder Yet</string>
-    <string name="main_activity_sunset_time_placeholder">No Sunset Reminder Yet</string>
+    <string name="main_activity_sunrise_reminder_placeholder">Select sunrise reminder</string>
+    <string name="main_activity_sunset_reminder_placeholder">Select sunset reminder</string>
+    <string name="main_activity_sunrise_time_placeholder">Updating sunrise time</string>
+    <string name="main_activity_sunset_time_placeholder">Updating sunset time</string>
 </resources>

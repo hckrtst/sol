@@ -7,6 +7,7 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:orientation="vertical"
+    android:background="@color/main_bkgrnd"
     tools:context="com.hellosanket.sol.MainActivityFragment"
     tools:showIn="@layout/activity_main"
     style="@style/CustomMainActivity">
@@ -18,12 +19,13 @@
         android:layout_alignParentTop="true"
         android:layout_weight="1">
         <TextView
-            android:id="@+id/sunset_reminder_caption_textview"
+            android:id="@+id/sunrise_time_textview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:textAlignment="center"
-            android:text="@string/main_activity_sunrise_time_placeholder"/>
+            android:text="@string/main_activity_sunrise_time_placeholder"
+            style="@style/CustomMainActivity"/>
     </LinearLayout>
     <LinearLayout
         android:layout_width="match_parent"
@@ -32,12 +34,12 @@
         android:layout_below="@id/sunrise_time_row"
         android:layout_weight="1">
         <TextView
-            android:id="@+id/sunrise_time_textview"
+            android:id="@+id/sunset_time_textview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:textAlignment="center"
-            android:text="@string/main_activity_sunrise_time_placeholder"
+            android:text="@string/main_activity_sunset_time_placeholder"
             style="@style/CustomMainActivity"/>
     </LinearLayout>
     <LinearLayout
@@ -52,7 +54,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:textAlignment="center"
-            android:text="@string/main_activity_sunrise_time_placeholder"/>
+            android:text="@string/main_activity_sunrise_reminder_placeholder"
+            style="@style/CustomMainActivity"/>
         <ToggleButton
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -72,7 +75,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:textAlignment="center"
-            android:text="@string/main_activity_sunrise_time_placeholder"/>
+            android:text="@string/main_activity_sunset_reminder_placeholder"
+            style="@style/CustomMainActivity"/>
         <ToggleButton
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
