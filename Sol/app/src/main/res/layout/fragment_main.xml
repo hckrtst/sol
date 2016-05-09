@@ -1,4 +1,4 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -6,34 +6,66 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
+    android:orientation="vertical"
     tools:context="com.hellosanket.sol.MainActivityFragment"
-    tools:showIn="@layout/activity_main">
+    tools:showIn="@layout/activity_main"
+    style="@style/CustomMainActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/sunrise_linear_layout">
+        android:id="@+id/sunrise_time_row"
+        android:layout_alignParentTop="true"
+        android:layout_weight="1">
         <TextView
-            android:id="@+id/sunrise_time_text_view"
+            android:id="@+id/sunset_reminder_caption_textview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:textAlignment="center"
             android:text="@string/main_activity_sunrise_time_placeholder"/>
-
-
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/sunset_time_row"
+        android:layout_below="@id/sunrise_time_row"
+        android:layout_weight="1">
+        <TextView
+            android:id="@+id/sunrise_time_textview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textAlignment="center"
+            android:text="@string/main_activity_sunrise_time_placeholder"
+            style="@style/CustomMainActivity"/>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/sunrise_reminder_row"
+        android:layout_below="@+id/sunset_time_row"
+        android:layout_weight="1">
+        <TextView
+            android:id="@+id/sunrise_reminder_text_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textAlignment="center"
+            android:text="@string/main_activity_sunrise_time_placeholder"/>
         <ToggleButton
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/sunrise_reminder_toggle_btn"
             android:layout_weight="2"/>
-
     </LinearLayout>
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/sunrise_linear_layout">
+        android:layout_below="@id/sunrise_reminder_row"
+        android:id="@+id/sunset_reminder_row"
+        android:layout_alignParentBottom="true"
+        android:layout_weight="1">
         <TextView
             android:id="@+id/sunset_time_text_view"
             android:layout_width="match_parent"
@@ -46,10 +78,5 @@
             android:layout_height="wrap_content"
             android:id="@+id/sunset_reminder_toggle_btn"
             android:layout_weight="2"/>
-
     </LinearLayout>
-
-
-
-
-</RelativeLayout>
+</LinearLayout>
