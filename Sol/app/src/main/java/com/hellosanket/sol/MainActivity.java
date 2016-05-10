@@ -1,17 +1,42 @@
 package com.hellosanket.sol;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
+    private static final String TAG = "MainActivity";
+    private boolean mServiceWarmedUp = false;
 
+    private void getSolarTimes() {
+        Intent intent = new Intent(MainActivity.this, MainService.class);
+        intent.setAction(MainService.ACTION_GET_SOL_TIMES);
+        startService(intent);
+
+    }
+
+    private boolean tryPermission() {
+        if ((ActivityCompat.checkSelfPermission(MainActivity.this,
+                Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)) {
+            ActivityCompat.requestPermissions(MainActivity.this,
+                    new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
+                    Constants.PERMISSIONS_REQUEST_LOCATION);
+            return false;
+        }
+        return true;
+    }
+
+    // TODO handle screen orientation changes
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -19,7 +44,6 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setBackgroundColor((getResources().getColor(R.color.main_toolbar)));
         setSupportActionBar(toolbar);
-
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -33,6 +57,19 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(MainActivity.this, MainService.class);
         startService(intent);
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (!mServiceWarmedUp){
+           getSolarTimes();
+            mServiceWarmedUp = true;
+        }
+
+        // TODO refresh UI
+    }
+
+    on
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -55,4 +92,27 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                                           int[] grantResults) {
+        L.d(TAG, "onRequestPermissionsResult");
+
+        switch (requestCode) {
+            case Constants.PERMISSIONS_REQUEST_LOCATION: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    L.d(TAG,"Granted Permission");
+                    getSolarTimes();
+                } else {
+                    Toast.makeText(this, "No Location, no reminder :'(", Toast.LENGTH_SHORT).show();
+                }
+                return;
+            }
+        }
+    }
+
+
 }
