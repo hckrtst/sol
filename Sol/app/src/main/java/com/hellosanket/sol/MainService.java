@@ -4,6 +4,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.HandlerThread;
 import android.os.IBinder;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -13,11 +14,9 @@ import com.google.android.gms.location.LocationServices;
 public class MainService extends Service {
     private final static String TAG = "MainService";
     private GClient mGClient;
-
-    public final static String ACTION_GET_SOL_TIMES = "sol.mainservice.get.sol.times";
+    public final static String ACTION_GET_SOL_TIMES = "sol.mainservice.get.solar.times";
 
     public MainService() {
-        L.d(TAG, "MainService xtor");
         mGClient = new GClient();
     }
 
@@ -31,6 +30,9 @@ public class MainService extends Service {
         L.d(TAG, "onStartCommand");
         if (intent != null) {
             L.d(TAG, "Got intent = " + intent.getAction());
+            if (ACTION_GET_SOL_TIMES.equals(intent.getAction())) {
+                // fetch the solar times based on location
+            }
         }
         return Service.START_NOT_STICKY;
     }

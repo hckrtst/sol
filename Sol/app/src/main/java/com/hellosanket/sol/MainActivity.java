@@ -2,6 +2,7 @@ package com.hellosanket.sol;
 
 import android.Manifest;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -14,7 +15,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener{
     private static final String TAG = "MainActivity";
     private boolean mServiceWarmedUp = false;
 
@@ -95,7 +96,6 @@ public class MainActivity extends AppCompatActivity {
         if (id == R.id.action_settings) {
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -124,5 +124,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onSaveInstanceState(Bundle outState) {
         outState.putBoolean("mServiceWarmedUp", mServiceWarmedUp);
         super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        // TODO handle
     }
 }
