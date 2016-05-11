@@ -18,13 +18,13 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     private boolean mServiceWarmedUp = false;
 
+    /*---------------- LOCAL METHODS ----------------------------------*/
     private void getSolarTimes() {
         Intent intent = new Intent(MainActivity.this, MainService.class);
         intent.setAction(MainService.ACTION_GET_SOL_TIMES);
         startService(intent);
 
     }
-
     private boolean tryPermission() {
         if ((ActivityCompat.checkSelfPermission(MainActivity.this,
                 Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)) {
@@ -35,8 +35,12 @@ public class MainActivity extends AppCompatActivity {
         }
         return true;
     }
+    private void restoreOnCreate(Bundle savedInstanceState) {
+        mServiceWarmedUp = savedInstanceState.getBoolean("mServiceWarmedUp");
+    }
 
-    // TODO handle screen orientation changes
+
+    /*-------------------------------- OVERRIDDEN METHODS ------------------------------------*/
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,23 +57,25 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // start service in advance
-        Intent intent = new Intent(MainActivity.this, MainService.class);
-        startService(intent);
+        if (savedInstanceState == null) {
+            // start service in advance
+            Intent intent = new Intent(MainActivity.this, MainService.class);
+            startService(intent);
+        } else {
+            restoreOnCreate(savedInstanceState);
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         if (!mServiceWarmedUp){
-           getSolarTimes();
+            getSolarTimes();
             mServiceWarmedUp = true;
         }
 
         // TODO refresh UI
     }
-
-    on
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -114,5 +120,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putBoolean("mServiceWarmedUp", mServiceWarmedUp);
+        super.onSaveInstanceState(outState);
+    }
 }
