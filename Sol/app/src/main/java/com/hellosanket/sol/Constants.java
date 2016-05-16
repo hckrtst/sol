@@ -8,4 +8,5 @@ public final class Constants {
             "com.hellosanket.sol";
     public static final int PERMISSIONS_REQUEST_LOCATION = 223;
 
+
 }

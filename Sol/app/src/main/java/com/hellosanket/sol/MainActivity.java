@@ -26,8 +26,9 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         startService(intent);
 
     }
+
     private boolean tryPermission() {
-        if ((ActivityCompat.checkSelfPermission(MainActivity.this,
+        if ((ActivityCompat.checkSelfPermission(getApplicationContext(),
                 Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)) {
             ActivityCompat.requestPermissions(MainActivity.this,
                     new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
@@ -65,12 +66,14 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         } else {
             restoreOnCreate(savedInstanceState);
         }
+        tryPermission();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         if (!mServiceWarmedUp){
+            // TODO use tryPermission()
             getSolarTimes();
             mServiceWarmedUp = true;
         }

@@ -12,9 +12,9 @@ import android.support.v4.app.ActivityCompat;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-import com.luckycatlabs.sunrisesunset.SunriseSunsetCalculator;
-import com.luckycatlabs.sunrisesunset.dto.MyLocation;
+
 
 import java.util.Calendar;
 import java.util.Date;
@@ -24,7 +24,6 @@ public class MainService extends Service {
     private final static String TAG = "MainService";
     private GClient mGClient;
     public final static String ACTION_GET_SOLAR_TIMES = "sol.mainservice.get.solar.times";
-    protected SunriseSunsetCalculator sunsetCalculator;
 
     public MainService() {
         mGClient = new GClient();
@@ -43,7 +42,7 @@ public class MainService extends Service {
             if (ACTION_GET_SOLAR_TIMES.equals(intent.getAction())) {
                 // fetch the solar times based on location
 
-                // TEST - will do the calcution in an intentservice
+                // TEST - will do the calculation in an intentservice
                 /*
                 MyLocation location = new MyLocation("", "");
                 SunriseSunsetCalculator calculator = new SunriseSunsetCalculator(location, "America/Los_Angeles");
@@ -51,6 +50,7 @@ public class MainService extends Service {
                 L.d(TAG, "Sunrise at " + calculator.getOfficialSunriseForDate(Calendar.getInstance()));
                 L.d(TAG, "Sunset at " + calculator.getOfficialSunsetForDate(Calendar.getInstance()));
                 */
+
 
             }
         }
@@ -112,6 +112,8 @@ public class MainService extends Service {
         public boolean isConnected() {
             return mGoogleApiClient.isConnected();
         }
+
+        public synchronized Location getLocation() { return mLocation; }
     }
     /*******************/
 }
