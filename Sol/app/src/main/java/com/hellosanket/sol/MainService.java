@@ -13,6 +13,7 @@ import android.support.v4.app.ActivityCompat;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
+import com.luckycatlabs.sunrisesunset.SunriseSunsetCalculator;
 
 import java.util.Locale;
 
@@ -20,6 +21,7 @@ public class MainService extends Service {
     private final static String TAG = "MainService";
     private GClient mGClient;
     public final static String ACTION_GET_SOLAR_TIMES = "sol.mainservice.get.solar.times";
+    protected SunriseSunsetCalculator sunsetCalculator;
 
     public MainService() {
         mGClient = new GClient();
