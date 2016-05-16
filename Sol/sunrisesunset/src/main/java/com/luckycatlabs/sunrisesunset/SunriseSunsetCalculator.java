@@ -20,43 +20,43 @@ import java.util.Calendar;
 import java.util.TimeZone;
 
 import com.luckycatlabs.sunrisesunset.calculator.SolarEventCalculator;
-import com.luckycatlabs.sunrisesunset.dto.Location;
+import com.luckycatlabs.sunrisesunset.dto.MyLocation;
 
 /**
  * Public interface for getting the various types of sunrise/sunset.
  */
 public class SunriseSunsetCalculator {
 
-    private Location location;
+    private MyLocation location;
 
     private SolarEventCalculator calculator;
 
     /**
-     * Constructs a new <code>SunriseSunsetCalculator</code> with the given <code>Location</code>
+     * Constructs a new <code>SunriseSunsetCalculator</code> with the given <code>MyLocation</code>
      * 
      * @param location
-     *            <code>Location</code> object containing the Latitude/Longitude of the location to compute
+     *            <code>MyLocation</code> object containing the Latitude/Longitude of the location to compute
      *            the sunrise/sunset for.
      * @param timeZoneIdentifier
      *            String identifier for the timezone to compute the sunrise/sunset times in. In the form
      *            "America/New_York". Please see the zi directory under the JDK installation for supported
      *            time zones.
      */
-    public SunriseSunsetCalculator(Location location, String timeZoneIdentifier) {
+    public SunriseSunsetCalculator(MyLocation location, String timeZoneIdentifier) {
         this.location = location;
         this.calculator = new SolarEventCalculator(location, timeZoneIdentifier);
     }
 
     /**
-     * Constructs a new <code>SunriseSunsetCalculator</code> with the given <code>Location</code>
+     * Constructs a new <code>SunriseSunsetCalculator</code> with the given <code>MyLocation</code>
      * 
      * @param location
-     *            <code>Location</code> object containing the Latitude/Longitude of the location to compute
+     *            <code>MyLocation</code> object containing the Latitude/Longitude of the location to compute
      *            the sunrise/sunset for.
      * @param timeZone
      *            timezone to compute the sunrise/sunset times in.
      */
-    public SunriseSunsetCalculator(Location location, TimeZone timeZone) {
+    public SunriseSunsetCalculator(MyLocation location, TimeZone timeZone) {
         this.location = location;
         this.calculator = new SolarEventCalculator(location, timeZone);
     }
@@ -254,7 +254,7 @@ public class SunriseSunsetCalculator {
      */
 
     public static Calendar getSunrise(double latitude, double longitude, TimeZone timeZone, Calendar date, double degrees) {
-        SolarEventCalculator solarEventCalculator = new SolarEventCalculator(new Location(latitude, longitude), timeZone);
+        SolarEventCalculator solarEventCalculator = new SolarEventCalculator(new MyLocation(latitude, longitude), timeZone);
         return solarEventCalculator.computeSunriseCalendar(new Zenith(90 - degrees), date);
     }
 
@@ -275,7 +275,7 @@ public class SunriseSunsetCalculator {
      */
 
     public static Calendar getSunset(double latitude, double longitude, TimeZone timeZone, Calendar date, double degrees) {
-        SolarEventCalculator solarEventCalculator = new SolarEventCalculator(new Location(latitude, longitude), timeZone);
+        SolarEventCalculator solarEventCalculator = new SolarEventCalculator(new MyLocation(latitude, longitude), timeZone);
         return solarEventCalculator.computeSunsetCalendar(new Zenith(90 - degrees), date);
     }
 
@@ -284,7 +284,7 @@ public class SunriseSunsetCalculator {
      * 
      * @return <code>Location</code> object representing the location of the computed sunrise/sunset.
      */
-    public Location getLocation() {
+    public MyLocation getLocation() {
         return location;
     }
 }

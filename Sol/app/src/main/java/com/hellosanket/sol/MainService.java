@@ -14,7 +14,10 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 import com.luckycatlabs.sunrisesunset.SunriseSunsetCalculator;
+import com.luckycatlabs.sunrisesunset.dto.MyLocation;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
 
 public class MainService extends Service {
@@ -39,6 +42,16 @@ public class MainService extends Service {
             L.d(TAG, "Got intent = " + intent.getAction());
             if (ACTION_GET_SOLAR_TIMES.equals(intent.getAction())) {
                 // fetch the solar times based on location
+
+                // TEST - will do the calcution in an intentservice
+                /*
+                MyLocation location = new MyLocation("", "");
+                SunriseSunsetCalculator calculator = new SunriseSunsetCalculator(location, "America/Los_Angeles");
+
+                L.d(TAG, "Sunrise at " + calculator.getOfficialSunriseForDate(Calendar.getInstance()));
+                L.d(TAG, "Sunset at " + calculator.getOfficialSunsetForDate(Calendar.getInstance()));
+                */
+
             }
         }
         return Service.START_NOT_STICKY;

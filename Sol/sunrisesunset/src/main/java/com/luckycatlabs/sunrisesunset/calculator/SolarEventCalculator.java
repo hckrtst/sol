@@ -23,25 +23,25 @@ import java.util.Calendar;
 import java.util.TimeZone;
 
 import com.luckycatlabs.sunrisesunset.Zenith;
-import com.luckycatlabs.sunrisesunset.dto.Location;
+import com.luckycatlabs.sunrisesunset.dto.MyLocation;
 
 /**
  * Parent class of the Sunrise and Sunset calculator classes.
  */
 public class SolarEventCalculator {
-    final private Location location;
+    final private MyLocation location;
     final private TimeZone timeZone;
 
     /**
      * Constructs a new <code>SolarEventCalculator</code> using the given parameters.
      *
      * @param location
-     *            <code>Location</code> of the place where the solar event should be calculated from.
+     *            <code>MyLocation</code> of the place where the solar event should be calculated from.
      * @param timeZoneIdentifier
      *            time zone identifier of the timezone of the location parameter. For example,
      *            "America/New_York".
      */
-    public SolarEventCalculator(Location location, String timeZoneIdentifier) {
+    public SolarEventCalculator(MyLocation location, String timeZoneIdentifier) {
         this.location = location;
         this.timeZone = TimeZone.getTimeZone(timeZoneIdentifier);
     }
@@ -50,11 +50,11 @@ public class SolarEventCalculator {
      * Constructs a new <code>SolarEventCalculator</code> using the given parameters.
      *
      * @param location
-     *            <code>Location</code> of the place where the solar event should be calculated from.
+     *            <code>MyLocation</code> of the place where the solar event should be calculated from.
      * @param timeZone
      *            timezone of the location parameter.
      */
-    public SolarEventCalculator(Location location, TimeZone timeZone) {
+    public SolarEventCalculator(MyLocation location, TimeZone timeZone) {
         this.location = location;
         this.timeZone = timeZone;
     }
