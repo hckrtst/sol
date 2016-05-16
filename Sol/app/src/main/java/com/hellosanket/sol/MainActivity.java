@@ -22,7 +22,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     /*---------------- LOCAL METHODS ----------------------------------*/
     private void getSolarTimes() {
         Intent intent = new Intent(MainActivity.this, MainService.class);
-        intent.setAction(MainService.ACTION_GET_SOL_TIMES);
+        intent.setAction(MainService.ACTION_GET_SOLAR_TIMES);
         startService(intent);
 
     }

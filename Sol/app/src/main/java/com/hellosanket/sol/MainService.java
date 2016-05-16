@@ -1,20 +1,25 @@
 package com.hellosanket.sol;
 
+import android.Manifest;
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Geocoder;
+import android.location.Location;
 import android.os.Bundle;
-import android.os.HandlerThread;
 import android.os.IBinder;
+import android.support.v4.app.ActivityCompat;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 
+import java.util.Locale;
+
 public class MainService extends Service {
     private final static String TAG = "MainService";
     private GClient mGClient;
-    public final static String ACTION_GET_SOL_TIMES = "sol.mainservice.get.solar.times";
+    public final static String ACTION_GET_SOLAR_TIMES = "sol.mainservice.get.solar.times";
 
     public MainService() {
         mGClient = new GClient();
@@ -30,7 +35,7 @@ public class MainService extends Service {
         L.d(TAG, "onStartCommand");
         if (intent != null) {
             L.d(TAG, "Got intent = " + intent.getAction());
-            if (ACTION_GET_SOL_TIMES.equals(intent.getAction())) {
+            if (ACTION_GET_SOLAR_TIMES.equals(intent.getAction())) {
                 // fetch the solar times based on location
             }
         }
@@ -50,7 +55,7 @@ public class MainService extends Service {
         private final static String TAG = "GClient";
         // Provides the entry point to Google Play services.
         private GoogleApiClient mGoogleApiClient;
-        private boolean mConnected = false;
+        Location mLocation;
 
         public GClient() {
 
@@ -69,7 +74,13 @@ public class MainService extends Service {
         @Override
         public void onConnected(Bundle bundle) {
             L.d(TAG, "Connected to google api service");
-            mConnected = true;
+            if ((ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) /*||
+                (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)*/) {
+                L.w(TAG, "Bailed due to no permission");
+                return;
+            }
+            mLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+            L.d(TAG, "Location: " + mLocation.toString());
         }
 
         @Override
@@ -81,11 +92,10 @@ public class MainService extends Service {
         @Override
         public void onConnectionFailed(ConnectionResult connectionResult) {
             L.d(TAG, "Failed to connect to google api service");
-            mConnected = false;
         }
 
         public boolean isConnected() {
-            return mConnected;
+            return mGoogleApiClient.isConnected();
         }
     }
     /*******************/

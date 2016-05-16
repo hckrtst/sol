@@ -25,6 +25,9 @@
         <service
             android:name=".MainService"
             android:enabled="true"
+            android:exported="false" />
+        <service
+            android:name=".SolarDataIntentService"
             android:exported="false"></service>
     </application>
 
