@@ -2,6 +2,7 @@ package com.hellosanket.sol;
 
 import android.Manifest;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Geocoder;
@@ -50,6 +51,12 @@ public class MainService extends Service {
                 L.d(TAG, "Sunrise at " + calculator.getOfficialSunriseForDate(Calendar.getInstance()));
                 L.d(TAG, "Sunset at " + calculator.getOfficialSunsetForDate(Calendar.getInstance()));
                 */
+                if (mGClient.getLocation() != null) {
+                    SolarDataIntentService.startComputeService(getApplicationContext(),
+                            mGClient.getLocation());
+                } else {
+                    L.w(TAG, "no location yet");
+                }
 
 
             }
@@ -63,14 +70,20 @@ public class MainService extends Service {
         mGClient.build();
     }
 
+    /** Public methods **/
+    public static void getSolarTimes(Context context) {
+        Intent intent = new Intent(context, MainService.class);
+        intent.setAction(MainService.ACTION_GET_SOLAR_TIMES);
+        context.startService(intent);
+    }
+
     /** Inner Classes **/
-    // TODO: can this be a static class?
     private class GClient implements GoogleApiClient.OnConnectionFailedListener,
             GoogleApiClient.ConnectionCallbacks {
         private final static String TAG = "GClient";
         // Provides the entry point to Google Play services.
         private GoogleApiClient mGoogleApiClient;
-        Location mLocation;
+        private Location mLocation;
 
         public GClient() {
 
@@ -95,7 +108,9 @@ public class MainService extends Service {
                 return;
             }
             mLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-            L.d(TAG, "Location: " + mLocation.toString());
+            if (mLocation != null ) L.d(TAG, "Location: " + mLocation.toString());
+            MainService.getSolarTimes(getApplicationContext());
+
         }
 
         @Override

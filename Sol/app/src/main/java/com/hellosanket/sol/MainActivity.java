@@ -20,13 +20,6 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     private boolean mServiceWarmedUp = false;
 
     /*---------------- LOCAL METHODS ----------------------------------*/
-    private void getSolarTimes() {
-        Intent intent = new Intent(MainActivity.this, MainService.class);
-        intent.setAction(MainService.ACTION_GET_SOLAR_TIMES);
-        startService(intent);
-
-    }
-
     private boolean tryPermission() {
         if ((ActivityCompat.checkSelfPermission(getApplicationContext(),
                 Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)) {
@@ -74,7 +67,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         super.onResume();
         if (!mServiceWarmedUp){
             // TODO use tryPermission()
-            getSolarTimes();
+            MainService.getSolarTimes(getApplicationContext());
             mServiceWarmedUp = true;
         }
 
@@ -114,7 +107,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
                     L.d(TAG,"Granted Permission");
-                    getSolarTimes();
+                    MainService.getSolarTimes(getApplicationContext());
                 } else {
                     Toast.makeText(this, "No Location, no reminder :'(", Toast.LENGTH_SHORT).show();
                 }
