@@ -5,4 +5,7 @@
     <string name="main_activity_sunset_reminder_placeholder">Select sunset reminder</string>
     <string name="main_activity_sunrise_time_placeholder">Updating sunrise time</string>
     <string name="main_activity_sunset_time_placeholder">Updating sunset time</string>
+
+    <string name="main_activity_sunrise_time_leader">Sunrise is at </string>
+    <string name="main_activity_sunset_time_leader">Sunset is at </string>
 </resources>

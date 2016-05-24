@@ -64,8 +64,15 @@ public class SolarDataIntentService extends IntentService {
             String timeZone = SimpleTimeZone.getDefault().getID();
             L.d(TAG,"my timzezone is " + timeZone);
             SunriseSunsetCalculator calculator = new SunriseSunsetCalculator(loc, timeZone);
-            L.d(TAG, "Sunrise at " + calculator.getOfficialSunriseForDate(Calendar.getInstance()));
-            L.d(TAG, "Sunset at " + calculator.getOfficialSunsetForDate(Calendar.getInstance()));
+            String sunrise = calculator.getOfficialSunriseForDate(Calendar.getInstance());
+            String sunset = calculator.getOfficialSunsetForDate(Calendar.getInstance());
+            L.d(TAG, "Sunrise at " + sunrise);
+            L.d(TAG, "Sunset at " + sunset);
+            DataWrapper.saveString(getApplicationContext(),
+                    Constants.SOL_DB, Constants.SUNRISE_TIME_TEXT_KEY, sunrise);
+            DataWrapper.saveString(getApplicationContext(),
+                    Constants.SOL_DB, Constants.SUNSET_TIME_TEXT_KEY, sunset);
+
         } catch (NullPointerException e) {
             L.e(TAG, "failed to get lat long");
         }

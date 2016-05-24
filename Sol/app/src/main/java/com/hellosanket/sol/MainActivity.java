@@ -13,11 +13,14 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener{
     private static final String TAG = "MainActivity";
     private boolean mServiceWarmedUp = false;
+    private TextView mSunriseTimeTextView, mSunsetTimeTextView;
+
 
     /*---------------- LOCAL METHODS ----------------------------------*/
     private boolean tryPermission() {
@@ -51,6 +54,13 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                         .setAction("Action", null).show();
             }
         });
+
+        mSunriseTimeTextView = (TextView) findViewById(R.id.sunrise_time_textview);
+        mSunsetTimeTextView = (TextView) findViewById(R.id.sunset_time_textview);
+
+        // register to be notified of shared prefs
+        DataWrapper.registerListener(getApplicationContext(), Constants.SOL_DB, this);
+
 
         if (savedInstanceState == null) {
             // start service in advance
@@ -124,6 +134,14 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        // TODO handle
+        if (key.equals(Constants.SUNRISE_TIME_TEXT_KEY)) {
+            L.d(TAG, "Sunrise updated to " + sharedPreferences.getString(key, "<default>"));
+            mSunriseTimeTextView.setText(R.string.main_activity_sunrise_time_leader +
+                    sharedPreferences.getString(key, "<default>"));
+        } else if (key.equals(Constants.SUNSET_TIME_TEXT_KEY)) {
+            mSunsetTimeTextView.setText(R.string.main_activity_sunset_time_leader +
+                    sharedPreferences.getString(key, "<default>"));
+        }
+
     }
 }

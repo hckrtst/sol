@@ -10,5 +10,9 @@ public final class Constants {
 
     public static final String SOLAR_DATA_INTENT_LOC_EXTRA = "loc";
 
+    public static final String SOL_DB = "sol.data";
+    public static final String SUNRISE_TIME_TEXT_KEY = "sunsrise.time.text";
+    public static final String SUNSET_TIME_TEXT_KEY = "sunset.time.text";
+
 
 }
