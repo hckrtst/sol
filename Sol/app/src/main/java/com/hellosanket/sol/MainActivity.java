@@ -89,13 +89,12 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     @Override
     protected void onResume() {
         super.onResume();
-        if (!mServiceWarmedUp){
-            // TODO use tryPermission()
-            MainService.getSolarTimes(getApplicationContext());
-            mServiceWarmedUp = true;
-        }
-
-        // TODO refresh UI
+        //if (!mServiceWarmedUp){
+            if (tryPermission()) {
+                MainService.getSolarTimes(getApplicationContext());
+            }
+        //    mServiceWarmedUp = true;
+        //}
     }
 
     @Override
@@ -131,7 +130,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
                     L.d(TAG,"Granted Permission");
-                    MainService.getSolarTimes(getApplicationContext());
+                    MainService.init(getApplicationContext());
                 } else {
                     Toast.makeText(this, "No Location, no reminder :'(", Toast.LENGTH_SHORT).show();
                 }

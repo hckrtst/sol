@@ -25,6 +25,7 @@ public class MainService extends Service {
     private final static String TAG = "MainService";
     private GClient mGClient;
     public final static String ACTION_GET_SOLAR_TIMES = "sol.mainservice.get.solar.times";
+    public final static String ACTION_LOC_PERM_GRANTED = "sol.mainservice.loc.perm.granted";
 
     public MainService() {
         mGClient = new GClient();
@@ -37,28 +38,19 @@ public class MainService extends Service {
     }
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        L.d(TAG, "onStartCommand");
         if (intent != null) {
             L.d(TAG, "Got intent = " + intent.getAction());
             if (ACTION_GET_SOLAR_TIMES.equals(intent.getAction())) {
+
                 // fetch the solar times based on location
-
-                // TEST - will do the calculation in an intentservice
-                /*
-                MyLocation location = new MyLocation("", "");
-                SunriseSunsetCalculator calculator = new SunriseSunsetCalculator(location, "America/Los_Angeles");
-
-                L.d(TAG, "Sunrise at " + calculator.getOfficialSunriseForDate(Calendar.getInstance()));
-                L.d(TAG, "Sunset at " + calculator.getOfficialSunsetForDate(Calendar.getInstance()));
-                */
                 if (mGClient.getLocation() != null) {
                     SolarDataIntentService.startComputeService(getApplicationContext(),
                             mGClient.getLocation());
                 } else {
                     L.w(TAG, "no location yet");
                 }
-
-
+            } else if(ACTION_LOC_PERM_GRANTED.equals(intent.getAction())) {
+                mGClient.build();
             }
         }
         return Service.START_NOT_STICKY;
@@ -67,13 +59,19 @@ public class MainService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        mGClient.build();
+
     }
 
     /** Public methods **/
     public static void getSolarTimes(Context context) {
         Intent intent = new Intent(context, MainService.class);
         intent.setAction(MainService.ACTION_GET_SOLAR_TIMES);
+        context.startService(intent);
+    }
+
+    public static void init(Context context) {
+        Intent intent = new Intent(context, MainService.class);
+        intent.setAction(MainService.ACTION_LOC_PERM_GRANTED);
         context.startService(intent);
     }
 
@@ -123,6 +121,8 @@ public class MainService extends Service {
         public void onConnectionFailed(ConnectionResult connectionResult) {
             L.d(TAG, "Failed to connect to google api service");
         }
+
+
 
         public boolean isConnected() {
             return mGoogleApiClient.isConnected();
