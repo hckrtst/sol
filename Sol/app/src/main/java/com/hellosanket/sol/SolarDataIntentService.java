@@ -1,22 +1,22 @@
 package com.hellosanket.sol;
 
 import android.app.IntentService;
-import android.content.Intent;
 import android.content.Context;
+import android.content.Intent;
 import android.location.Location;
 
 import com.luckycatlabs.sunrisesunset.SunriseSunsetCalculator;
 import com.luckycatlabs.sunrisesunset.dto.MyLocation;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.SimpleTimeZone;
-import java.util.TimeZone;
 
 /**
  *
  */
 public class SolarDataIntentService extends IntentService {
-    private static final String ACTION_COMPUTE = "com.hellosanket.sol.action.FOO";
+    private static final String ACTION_COMPUTE = "com.hellosanket.sol.action.compute";
     private SunriseSunsetCalculator mCalculator;
     private static final String TAG = "SolarDataIntentService";
 
@@ -62,12 +62,13 @@ public class SolarDataIntentService extends IntentService {
             loc = new MyLocation(new Double(location.getLatitude()).toString(),
                     new Double(location.getLongitude()).toString());
             String timeZone = SimpleTimeZone.getDefault().getID();
-            L.d(TAG,"my timzezone is " + timeZone);
             SunriseSunsetCalculator calculator = new SunriseSunsetCalculator(loc, timeZone);
-            String sunrise = calculator.getOfficialSunriseForDate(Calendar.getInstance());
-            String sunset = calculator.getOfficialSunsetForDate(Calendar.getInstance());
-            L.d(TAG, "Sunrise at " + sunrise);
-            L.d(TAG, "Sunset at " + sunset);
+            Calendar sunriseCal = calculator.getOfficialSunriseCalendarForDate(Calendar.getInstance());
+            Calendar sunsetCal = calculator.getOfficialSunsetCalendarForDate(Calendar.getInstance());
+
+            String sunrise = getPrettyTime(sunriseCal);
+            String sunset = getPrettyTime(sunsetCal);
+
             DataWrapper.saveString(getApplicationContext(),
                     Constants.SOL_DB, Constants.SUNRISE_TIME_TEXT_KEY, sunrise);
             DataWrapper.saveString(getApplicationContext(),
@@ -76,8 +77,11 @@ public class SolarDataIntentService extends IntentService {
         } catch (NullPointerException e) {
             L.e(TAG, "failed to get lat long");
         }
+    }
 
-
+    private String getPrettyTime(Calendar cal) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("LLL dd hh:mm a z");
+        return simpleDateFormat.format(cal.getTime());
     }
 
 }
