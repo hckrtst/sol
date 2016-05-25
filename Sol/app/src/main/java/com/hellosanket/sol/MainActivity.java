@@ -61,6 +61,20 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         // register to be notified of shared prefs
         DataWrapper.registerListener(getApplicationContext(), Constants.SOL_DB, this);
 
+        String sunrise = DataWrapper.readString(getApplicationContext(),
+                Constants.SOL_DB, Constants.SUNRISE_TIME_TEXT_KEY, "unset");
+        String sunset = DataWrapper.readString(getApplicationContext(),
+                Constants.SOL_DB, Constants.SUNSET_TIME_TEXT_KEY, "unset");
+
+        if (!sunrise.equals("unset")) {
+            mSunriseTimeTextView.setText( getString(R.string.main_activity_sunrise_time_leader) +
+                    " " + sunrise);
+        }
+
+        if (!sunset.equals("unset")) {
+            mSunsetTimeTextView.setText( getString(R.string.main_activity_sunset_time_leader) +
+                    " " + sunset);
+        }
 
         if (savedInstanceState == null) {
             // start service in advance
@@ -136,10 +150,10 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (key.equals(Constants.SUNRISE_TIME_TEXT_KEY)) {
             L.d(TAG, "Sunrise updated to " + sharedPreferences.getString(key, "<default>"));
-            mSunriseTimeTextView.setText(R.string.main_activity_sunrise_time_leader +
+            mSunriseTimeTextView.setText( getString(R.string.main_activity_sunrise_time_leader) + " " +
                     sharedPreferences.getString(key, "<default>"));
         } else if (key.equals(Constants.SUNSET_TIME_TEXT_KEY)) {
-            mSunsetTimeTextView.setText(R.string.main_activity_sunset_time_leader +
+            mSunsetTimeTextView.setText(getString(R.string.main_activity_sunset_time_leader) + " " +
                     sharedPreferences.getString(key, "<default>"));
         }
 
