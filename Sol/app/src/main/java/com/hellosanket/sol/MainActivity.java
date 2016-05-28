@@ -18,7 +18,6 @@ import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener{
     private static final String TAG = "MainActivity";
-    private boolean mServiceWarmedUp = false;
     private TextView mSunriseTimeTextView, mSunsetTimeTextView;
 
 
@@ -34,7 +33,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         return true;
     }
     private void restoreOnCreate(Bundle savedInstanceState) {
-        mServiceWarmedUp = savedInstanceState.getBoolean("mServiceWarmedUp");
+        // Add anything we need to restore here
     }
 
 
@@ -91,6 +90,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         super.onResume();
         //if (!mServiceWarmedUp){
             if (tryPermission()) {
+                MainService.init(getApplicationContext());
                 MainService.getSolarTimes(getApplicationContext());
             }
         //    mServiceWarmedUp = true;
@@ -141,8 +141,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        outState.putBoolean("mServiceWarmedUp", mServiceWarmedUp);
-        super.onSaveInstanceState(outState);
+        // save anything we need
     }
 
     @Override
