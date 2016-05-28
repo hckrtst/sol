@@ -76,9 +76,8 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         }
 
         if (savedInstanceState == null) {
-            // start service in advance
-            Intent intent = new Intent(MainActivity.this, MainService.class);
-            startService(intent);
+            // init service in advance
+            MainService.init(getApplicationContext());
         } else {
             restoreOnCreate(savedInstanceState);
         }

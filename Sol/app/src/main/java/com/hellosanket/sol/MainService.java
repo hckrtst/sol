@@ -81,7 +81,6 @@ public class MainService extends Service {
         private final static String TAG = "GClient";
         // Provides the entry point to Google Play services.
         private GoogleApiClient mGoogleApiClient;
-        private Location mLocation;
 
         public GClient() {
 
@@ -100,13 +99,6 @@ public class MainService extends Service {
         @Override
         public void onConnected(Bundle bundle) {
             L.d(TAG, "Connected to google api service");
-            if ((ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) /*||
-                (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)*/) {
-                L.w(TAG, "Bailed due to no permission");
-                return;
-            }
-            mLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-            if (mLocation != null ) L.d(TAG, "Location: " + mLocation.toString());
             MainService.getSolarTimes(getApplicationContext());
 
         }
@@ -122,13 +114,20 @@ public class MainService extends Service {
             L.d(TAG, "Failed to connect to google api service");
         }
 
-
-
         public boolean isConnected() {
             return mGoogleApiClient.isConnected();
         }
 
-        public synchronized Location getLocation() { return mLocation; }
+        public synchronized Location getLocation() {
+            if ((ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) /*||
+                (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)*/) {
+                L.w(TAG, "Bailed due to no permission");
+                return null;
+            }
+            Location location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+            if (location == null ) L.e(TAG, "Location is null");
+            return location;
+        }
     }
     /*******************/
 }
