@@ -1,11 +1,15 @@
 package com.hellosanket.sol;
 
+import android.app.Dialog;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.NavUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.NumberPicker;
 
 /**
  * The dialog that allows users to pick
@@ -14,6 +18,7 @@ import android.view.ViewGroup;
  */
 public class ReminderDialogFragment extends DialogFragment{
     private static final String TAG = "ReminderDialog";
+    private NumberPicker mPicker;
 
     public ReminderDialogFragment() {
         // Adding empty constructor as per
@@ -43,6 +48,12 @@ public class ReminderDialogFragment extends DialogFragment{
         super.onViewCreated(view, savedInstanceState);
         String title = getArguments().getString("title");
         getDialog().setTitle(title);
+
+        // Use the 'View' luke!
+        NumberPicker picker = (NumberPicker) view.findViewById(R.id.number_picker);
+        picker.setMaxValue(59);
+        picker.setMinValue(0);
+
         L.d(TAG, "view created");
     }
 
@@ -52,5 +63,15 @@ public class ReminderDialogFragment extends DialogFragment{
         L.d(TAG, "being destroyed");
         ReminderDialogListener listener = (ReminderDialogListener) getActivity();
         listener.onReminderSet(false);
+    }
+
+    @NonNull
+    @Override
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+        /*NumberPicker picker = (NumberPicker) getDialog().findViewById(R.id.number_picker);
+        picker.setMaxValue(59);
+        picker.setMinValue(0);*/
+        L.d(TAG, "onCreateDialog");
+        return super.onCreateDialog(savedInstanceState);
     }
 }

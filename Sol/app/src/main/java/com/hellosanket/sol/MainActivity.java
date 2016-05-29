@@ -13,6 +13,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -54,7 +55,13 @@ public class MainActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         L.d(TAG, "onCreate");
         setContentView(R.layout.activity_main);
+
+        mSunriseTimeTextView = (TextView) findViewById(R.id.sunrise_time_textview);
+        mSunsetTimeTextView = (TextView) findViewById(R.id.sunset_time_textview);
+        mSunriseRemBtn = (ToggleButton) findViewById(R.id.sunrise_reminder_toggle_btn);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+
         toolbar.setBackgroundColor((getResources().getColor(R.color.main_toolbar)));
         setSupportActionBar(toolbar);
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -65,10 +72,6 @@ public class MainActivity extends AppCompatActivity implements
                         .setAction("Action", null).show();
             }
         });
-
-        mSunriseTimeTextView = (TextView) findViewById(R.id.sunrise_time_textview);
-        mSunsetTimeTextView = (TextView) findViewById(R.id.sunset_time_textview);
-        mSunriseRemBtn = (ToggleButton) findViewById(R.id.sunrise_reminder_toggle_btn);
 
         // register to be notified of shared prefs
         DataWrapper.registerListener(getApplicationContext(), Constants.SOL_DB, this);
