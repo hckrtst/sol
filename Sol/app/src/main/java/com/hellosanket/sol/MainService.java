@@ -5,7 +5,6 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -13,13 +12,7 @@ import android.support.v4.app.ActivityCompat;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-
-
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Locale;
 
 public class MainService extends Service {
     private final static String TAG = "MainService";
@@ -105,13 +98,13 @@ public class MainService extends Service {
 
         @Override
         public void onConnectionSuspended(int i) {
-            L.d(TAG, "google api service suspended");
+            L.w(TAG, "google api service suspended");
             if (mGoogleApiClient != null) mGoogleApiClient.connect();
         }
 
         @Override
         public void onConnectionFailed(ConnectionResult connectionResult) {
-            L.d(TAG, "Failed to connect to google api service");
+            L.e(TAG, "Failed to connect to google api service");
         }
 
         public boolean isConnected() {

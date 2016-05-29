@@ -1,7 +1,6 @@
 package com.hellosanket.sol;
 
 import android.Manifest;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -10,15 +9,17 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener{
     private static final String TAG = "MainActivity";
     private TextView mSunriseTimeTextView, mSunsetTimeTextView;
+    private Button mSunriseRemBtn, mSunsetRemBtn;
 
 
     /*---------------- LOCAL METHODS ----------------------------------*/
@@ -34,6 +35,13 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     }
     private void restoreOnCreate(Bundle savedInstanceState) {
         // Add anything we need to restore here
+    }
+
+    private void showReminderDialog(String title) {
+        android.support.v4.app.FragmentManager fragmentManager = getSupportFragmentManager();
+        ReminderDialogFragment dialogFragment = ReminderDialogFragment.newInstance(title);
+        dialogFragment.show(fragmentManager, "fragment_dialog_reminder");
+        L.d(TAG, "showing reminder for " + title);
     }
 
 
@@ -56,6 +64,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 
         mSunriseTimeTextView = (TextView) findViewById(R.id.sunrise_time_textview);
         mSunsetTimeTextView = (TextView) findViewById(R.id.sunset_time_textview);
+        mSunriseRemBtn = (Button) findViewById(R.id.sunrise_reminder_toggle_btn);
 
         // register to be notified of shared prefs
         DataWrapper.registerListener(getApplicationContext(), Constants.SOL_DB, this);
@@ -69,11 +78,17 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
             mSunriseTimeTextView.setText( getString(R.string.main_activity_sunrise_time_leader) +
                     " " + sunrise);
         }
-
         if (!sunset.equals("unset")) {
             mSunsetTimeTextView.setText( getString(R.string.main_activity_sunset_time_leader) +
                     " " + sunset);
         }
+
+        mSunriseRemBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showReminderDialog("Set Sunrise Reminder");
+            }
+        });
 
         if (savedInstanceState == null) {
             // init service in advance
@@ -87,13 +102,10 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     @Override
     protected void onResume() {
         super.onResume();
-        //if (!mServiceWarmedUp){
-            if (tryPermission()) {
-                MainService.init(getApplicationContext());
-                MainService.getSolarTimes(getApplicationContext());
-            }
-        //    mServiceWarmedUp = true;
-        //}
+        if (tryPermission()) {
+            MainService.init(getApplicationContext());
+            MainService.getSolarTimes(getApplicationContext());
+        }
     }
 
     @Override
@@ -155,4 +167,5 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         }
 
     }
+
 }

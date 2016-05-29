@@ -8,4 +8,7 @@
 
     <string name="main_activity_sunrise_time_leader">Sunrise is at </string>
     <string name="main_activity_sunset_time_leader">Sunset is at </string>
+
+    <string name="fragment_dialog_sunrise_title_text">Reminder before Sunrise</string>
+    <string name="fragment_dialog_sunset_title_text">Reminder before Sunset</string>
 </resources>
