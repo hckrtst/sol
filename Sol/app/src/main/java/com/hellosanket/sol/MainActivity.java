@@ -15,11 +15,14 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
-public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener{
+public class MainActivity extends AppCompatActivity implements
+        SharedPreferences.OnSharedPreferenceChangeListener,
+        ReminderDialogFragment.ReminderDialogListener{
     private static final String TAG = "MainActivity";
     private TextView mSunriseTimeTextView, mSunsetTimeTextView;
-    private Button mSunriseRemBtn, mSunsetRemBtn;
+    private ToggleButton mSunriseRemBtn, mSunsetRemBtn;
 
 
     /*---------------- LOCAL METHODS ----------------------------------*/
@@ -49,6 +52,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        L.d(TAG, "onCreate");
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setBackgroundColor((getResources().getColor(R.color.main_toolbar)));
@@ -64,7 +68,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 
         mSunriseTimeTextView = (TextView) findViewById(R.id.sunrise_time_textview);
         mSunsetTimeTextView = (TextView) findViewById(R.id.sunset_time_textview);
-        mSunriseRemBtn = (Button) findViewById(R.id.sunrise_reminder_toggle_btn);
+        mSunriseRemBtn = (ToggleButton) findViewById(R.id.sunrise_reminder_toggle_btn);
 
         // register to be notified of shared prefs
         DataWrapper.registerListener(getApplicationContext(), Constants.SOL_DB, this);
@@ -102,6 +106,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     @Override
     protected void onResume() {
         super.onResume();
+        L.d(TAG, "onResume");
         if (tryPermission()) {
             MainService.init(getApplicationContext());
             MainService.getSolarTimes(getApplicationContext());
@@ -168,4 +173,9 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 
     }
 
+    @Override
+    public void onReminderSet(boolean enabled) {
+        L.d(TAG, "onReminderSet = " + enabled);
+        mSunriseRemBtn.setChecked(enabled);
+    }
 }

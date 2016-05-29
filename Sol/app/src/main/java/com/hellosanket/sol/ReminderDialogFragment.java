@@ -20,6 +20,10 @@ public class ReminderDialogFragment extends DialogFragment{
         // https://stackoverflow.com/questions/25984054/android-fragments-is-empty-constructor-really-required
     }
 
+    public interface ReminderDialogListener {
+        void onReminderSet(boolean enabled);
+    }
+
     public static ReminderDialogFragment newInstance(String title) {
         Bundle args = new Bundle();
         args.putString("title", title);
@@ -40,6 +44,13 @@ public class ReminderDialogFragment extends DialogFragment{
         String title = getArguments().getString("title");
         getDialog().setTitle(title);
         L.d(TAG, "view created");
+    }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        L.d(TAG, "being destroyed");
+        ReminderDialogListener listener = (ReminderDialogListener) getActivity();
+        listener.onReminderSet(false);
     }
 }
