@@ -53,14 +53,11 @@ public class ReminderDialogFragment extends DialogFragment{
         NumberPicker picker = (NumberPicker) view.findViewById(R.id.number_picker);
         picker.setMaxValue(59);
         picker.setMinValue(0);
-
-        L.d(TAG, "view created");
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        L.d(TAG, "being destroyed");
         ReminderDialogListener listener = (ReminderDialogListener) getActivity();
         listener.onReminderSet(false);
     }
@@ -68,10 +65,6 @@ public class ReminderDialogFragment extends DialogFragment{
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        /*NumberPicker picker = (NumberPicker) getDialog().findViewById(R.id.number_picker);
-        picker.setMaxValue(59);
-        picker.setMinValue(0);*/
-        L.d(TAG, "onCreateDialog");
         return super.onCreateDialog(savedInstanceState);
     }
 }

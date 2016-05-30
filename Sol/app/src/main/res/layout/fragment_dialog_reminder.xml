@@ -3,12 +3,38 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
     <TextView
-        android:id="@+id/lbl_reminder_title" android:text="@string/fragment_dialog_sunrise_title_text"
-        android:layout_width="wrap_content" android:layout_height="wrap_content" />
+        android:id="@+id/lbl_reminder_title"
+        android:text="@string/fragment_dialog_sunrise_title_text"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginBottom="20dp"
+        android:layout_marginTop="20dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="@style/CustomMainActivity"/>
+
     <NumberPicker
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/number_picker"
         android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true"/>
+        android:layout_centerHorizontal="true"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        style="@style/CustomMainActivity"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Set"
+            android:layout_weight="1"/>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cancel"
+            android:layout_weight="1"/>
+    </LinearLayout>
 </LinearLayout>
