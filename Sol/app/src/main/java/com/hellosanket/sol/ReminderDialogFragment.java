@@ -9,6 +9,7 @@ import android.support.v4.app.NavUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.NumberPicker;
 
 /**
@@ -19,6 +20,9 @@ import android.widget.NumberPicker;
 public class ReminderDialogFragment extends DialogFragment{
     private static final String TAG = "ReminderDialog";
     private NumberPicker mPicker;
+    private boolean mPicked;
+    private int mReminderTime;
+    private String mDialogType;
 
     public ReminderDialogFragment() {
         // Adding empty constructor as per
@@ -26,12 +30,12 @@ public class ReminderDialogFragment extends DialogFragment{
     }
 
     public interface ReminderDialogListener {
-        void onReminderSet(boolean enabled);
+        void onReminderSet(final String type, final boolean enabled);
     }
 
-    public static ReminderDialogFragment newInstance(String title) {
+    public static ReminderDialogFragment newInstance(String type) {
         Bundle args = new Bundle();
-        args.putString("title", title);
+        args.putString("reminder_type", type);
         ReminderDialogFragment fragment = new ReminderDialogFragment();
         fragment.setArguments(args);
         return fragment;
@@ -46,20 +50,40 @@ public class ReminderDialogFragment extends DialogFragment{
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        String title = getArguments().getString("title");
-        getDialog().setTitle(title);
+        mDialogType = getArguments().getString("reminder_type");
+        getDialog().setTitle(mDialogType);
 
         // Use the 'View' luke!
-        NumberPicker picker = (NumberPicker) view.findViewById(R.id.number_picker);
+        final NumberPicker picker = (NumberPicker) view.findViewById(R.id.number_picker);
         picker.setMaxValue(59);
         picker.setMinValue(0);
+
+        Button btn_ok = (Button) view.findViewById(R.id.dialog_btn_ok);
+        btn_ok.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mPicked = true;
+                mReminderTime = picker.getValue();
+                L.d(TAG, "picked " + mReminderTime);
+                dismiss();
+            }
+        });
+
+        Button btn_cancel = (Button) view.findViewById(R.id.dialog_btn_cancel);
+        btn_cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                L.d(TAG, "dismissing");
+                dismiss();
+            }
+        });
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         ReminderDialogListener listener = (ReminderDialogListener) getActivity();
-        listener.onReminderSet(false);
+        listener.onReminderSet(mDialogType, mPicked);
     }
 
     @NonNull

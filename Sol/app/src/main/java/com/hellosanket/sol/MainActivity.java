@@ -12,6 +12,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.NumberPicker;
 import android.widget.TextView;
@@ -41,11 +42,19 @@ public class MainActivity extends AppCompatActivity implements
         // Add anything we need to restore here
     }
 
-    private void showReminderDialog(String title) {
+    private void showReminderDialog(String type) {
         android.support.v4.app.FragmentManager fragmentManager = getSupportFragmentManager();
-        ReminderDialogFragment dialogFragment = ReminderDialogFragment.newInstance(title);
+        ReminderDialogFragment dialogFragment = ReminderDialogFragment.newInstance(type);
         dialogFragment.show(fragmentManager, "fragment_dialog_reminder");
-        L.d(TAG, "showing reminder for " + title);
+        L.d(TAG, "showing reminder for " + type);
+    }
+
+    private void handleClick(final ToggleButton button, int resId) {
+        if (button.isChecked()) {
+            showReminderDialog(getString(resId));
+        } else {
+            button.setChecked(false);
+        }
     }
 
 
@@ -59,6 +68,7 @@ public class MainActivity extends AppCompatActivity implements
         mSunriseTimeTextView = (TextView) findViewById(R.id.sunrise_time_textview);
         mSunsetTimeTextView = (TextView) findViewById(R.id.sunset_time_textview);
         mSunriseRemBtn = (ToggleButton) findViewById(R.id.sunrise_reminder_toggle_btn);
+        mSunsetRemBtn = (ToggleButton) findViewById(R.id.sunset_reminder_toggle_btn);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 
@@ -93,7 +103,13 @@ public class MainActivity extends AppCompatActivity implements
         mSunriseRemBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showReminderDialog("Set Sunrise Reminder");
+                handleClick(mSunriseRemBtn, R.string.fragment_dialog_sunrise_title_text);
+            }
+        });
+        mSunsetRemBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                handleClick(mSunsetRemBtn, R.string.fragment_dialog_sunset_title_text);
             }
         });
 
@@ -177,8 +193,12 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onReminderSet(boolean enabled) {
-        L.d(TAG, "onReminderSet = " + enabled);
-        mSunriseRemBtn.setChecked(enabled);
+    public void onReminderSet(final String type, final boolean enabled) {
+        L.d(TAG, "type = " + type + ", enabled = " + enabled);
+        if (type.equals(getString(R.string.fragment_dialog_sunrise_title_text))) {
+            mSunriseRemBtn.setChecked(enabled);
+        } else {
+            mSunsetRemBtn.setChecked(enabled);
+        }
     }
 }
