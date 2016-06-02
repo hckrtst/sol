@@ -74,6 +74,8 @@ public class SolarDataIntentService extends IntentService {
             DataWrapper.saveString(getApplicationContext(),
                     Constants.SOL_DB, Constants.SUNSET_TIME_TEXT_KEY, sunset);
 
+            // TODO save Calendar objs to map
+
         } catch (NullPointerException e) {
             L.e(TAG, "failed to get lat long");
         }

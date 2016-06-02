@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.app.NavUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,7 +20,7 @@ public class ReminderDialogFragment extends DialogFragment{
     private static final String TAG = "ReminderDialog";
     private NumberPicker mPicker;
     private boolean mPicked;
-    private int mReminderTime;
+    private int mReminderOffset;
     private String mDialogType;
 
     public ReminderDialogFragment() {
@@ -30,7 +29,7 @@ public class ReminderDialogFragment extends DialogFragment{
     }
 
     public interface ReminderDialogListener {
-        void onReminderSet(final String type, final boolean enabled);
+        void onReminderSet(final String type, final boolean enabled, int offset);
     }
 
     public static ReminderDialogFragment newInstance(String type) {
@@ -63,8 +62,8 @@ public class ReminderDialogFragment extends DialogFragment{
             @Override
             public void onClick(View v) {
                 mPicked = true;
-                mReminderTime = picker.getValue();
-                L.d(TAG, "picked " + mReminderTime);
+                mReminderOffset = picker.getValue();
+                L.d(TAG, "picked " + mReminderOffset);
                 dismiss();
             }
         });
@@ -83,7 +82,7 @@ public class ReminderDialogFragment extends DialogFragment{
     public void onDestroyView() {
         super.onDestroyView();
         ReminderDialogListener listener = (ReminderDialogListener) getActivity();
-        listener.onReminderSet(mDialogType, mPicked);
+        listener.onReminderSet(mDialogType, mPicked, mReminderOffset);
     }
 
     @NonNull

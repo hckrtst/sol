@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Debug;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
@@ -12,9 +13,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager;
-import android.widget.Button;
-import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -193,12 +191,16 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onReminderSet(final String type, final boolean enabled) {
+    public void onReminderSet(final String type, final boolean enabled, int offset) {
         L.d(TAG, "type = " + type + ", enabled = " + enabled);
         if (type.equals(getString(R.string.fragment_dialog_sunrise_title_text))) {
             mSunriseRemBtn.setChecked(enabled);
         } else {
             mSunsetRemBtn.setChecked(enabled);
         }
+        if (enabled) {
+
+        }
     }
+
 }
