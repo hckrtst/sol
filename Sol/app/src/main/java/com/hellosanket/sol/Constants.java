@@ -14,5 +14,8 @@ public final class Constants {
     public static final String SUNRISE_TIME_TEXT_KEY = "sunsrise.time.text";
     public static final String SUNSET_TIME_TEXT_KEY = "sunset.time.text";
 
+    public static final short ALARM_TYPE_SUNRISE = 1;
+    public static final short ALARM_TYPE_SUNSET = 2;
+
 
 }

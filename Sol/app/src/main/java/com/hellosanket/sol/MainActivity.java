@@ -195,12 +195,20 @@ public class MainActivity extends AppCompatActivity implements
         L.d(TAG, "type = " + type + ", enabled = " + enabled);
         if (type.equals(getString(R.string.fragment_dialog_sunrise_title_text))) {
             mSunriseRemBtn.setChecked(enabled);
+            if (enabled) {
+                AlarmIntentService.startActionAdd(getApplicationContext(),
+                        Constants.ALARM_TYPE_SUNRISE,
+                        offset);
+            }
         } else {
             mSunsetRemBtn.setChecked(enabled);
+            if (enabled) {
+                AlarmIntentService.startActionAdd(getApplicationContext(),
+                        Constants.ALARM_TYPE_SUNSET,
+                        offset);
+            }
         }
-        if (enabled) {
 
-        }
     }
 
 }

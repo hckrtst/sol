@@ -19,11 +19,11 @@ public class CalendarDataHelper {
     private CalendarDataHelper() {
     }
 
-    Calendar getCalFor(String key) {
+    synchronized Calendar getCalFor(String key) {
         return data.get(key);
     }
 
-    void setCalFor(String key, Calendar value) {
+    synchronized void setCalFor(String key, Calendar value) {
         data.put(key, value);
     }
 }
