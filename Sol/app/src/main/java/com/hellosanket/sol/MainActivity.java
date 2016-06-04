@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Debug;
+import android.provider.ContactsContract;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
@@ -47,11 +48,14 @@ public class MainActivity extends AppCompatActivity implements
         L.d(TAG, "showing reminder for " + type);
     }
 
-    private void handleClick(final ToggleButton button, int resId) {
+    private void handleClick(final ToggleButton button, int resId, String alarmTypeKey) {
         if (button.isChecked()) {
             showReminderDialog(getString(resId));
         } else {
             button.setChecked(false);
+            DataWrapper.saveInt(getApplicationContext(),
+                    Constants.SOL_DB, alarmTypeKey, -1);
+            // TODO clear alarm
         }
     }
 
@@ -68,7 +72,7 @@ public class MainActivity extends AppCompatActivity implements
         mSunriseRemBtn = (ToggleButton) findViewById(R.id.sunrise_reminder_toggle_btn);
         mSunsetRemBtn = (ToggleButton) findViewById(R.id.sunset_reminder_toggle_btn);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        /*Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 
         toolbar.setBackgroundColor((getResources().getColor(R.color.main_toolbar)));
         setSupportActionBar(toolbar);
@@ -79,7 +83,7 @@ public class MainActivity extends AppCompatActivity implements
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             }
-        });
+        });*/
 
         // register to be notified of shared prefs
         DataWrapper.registerListener(getApplicationContext(), Constants.SOL_DB, this);
@@ -101,15 +105,25 @@ public class MainActivity extends AppCompatActivity implements
         mSunriseRemBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                handleClick(mSunriseRemBtn, R.string.fragment_dialog_sunrise_title_text);
+                handleClick(mSunriseRemBtn, R.string.fragment_dialog_sunrise_title_text,
+                        Constants.SUNRISE_ALARM_OFFSET_KEY);
             }
         });
         mSunsetRemBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                handleClick(mSunsetRemBtn, R.string.fragment_dialog_sunset_title_text);
+                handleClick(mSunsetRemBtn, R.string.fragment_dialog_sunset_title_text,
+                        Constants.SUNSET_ALARM_OFFSET_KEY);
             }
         });
+
+        if (DataWrapper.readInt(getApplicationContext(), Constants.SOL_DB, Constants.SUNRISE_ALARM_OFFSET_KEY, -1) >= 0) {
+            mSunriseRemBtn.setChecked(true);
+        }
+
+        if (DataWrapper.readInt(getApplicationContext(), Constants.SOL_DB, Constants.SUNSET_ALARM_OFFSET_KEY, -1) >= 0) {
+            mSunsetRemBtn.setChecked(true);
+        }
 
         if (savedInstanceState == null) {
             // init service in advance
@@ -196,16 +210,28 @@ public class MainActivity extends AppCompatActivity implements
         if (type.equals(getString(R.string.fragment_dialog_sunrise_title_text))) {
             mSunriseRemBtn.setChecked(enabled);
             if (enabled) {
+                DataWrapper.saveInt(getApplicationContext(),
+                        Constants.SOL_DB, Constants.SUNRISE_ALARM_OFFSET_KEY, offset);
                 AlarmIntentService.startActionAdd(getApplicationContext(),
                         Constants.ALARM_TYPE_SUNRISE,
                         offset);
+            } else {
+                DataWrapper.saveInt(getApplicationContext(),
+                        Constants.SOL_DB, Constants.SUNRISE_ALARM_OFFSET_KEY, -1);
+                // TODO clear alarm
             }
         } else {
             mSunsetRemBtn.setChecked(enabled);
             if (enabled) {
+                DataWrapper.saveInt(getApplicationContext(),
+                        Constants.SOL_DB, Constants.SUNSET_ALARM_OFFSET_KEY, offset);
                 AlarmIntentService.startActionAdd(getApplicationContext(),
                         Constants.ALARM_TYPE_SUNSET,
                         offset);
+            } else {
+                DataWrapper.saveInt(getApplicationContext(),
+                        Constants.SOL_DB, Constants.SUNSET_ALARM_OFFSET_KEY, -1);
+                // TODO clear alarm
             }
         }
 
