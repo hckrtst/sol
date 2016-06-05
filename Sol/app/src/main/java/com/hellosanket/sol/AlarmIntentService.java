@@ -1,19 +1,23 @@
 package com.hellosanket.sol;
 
+import android.app.AlarmManager;
 import android.app.IntentService;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.Context;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
  * a service on a separate handler thread.
  */
 public class AlarmIntentService extends IntentService {
-    private static final String ACTION_ADD = "com.hellosanket.sol.action.ADD";
-    private static final String ACTION_CLEAR = "com.hellosanket.sol.action.CLEAR";
+    private static final String ACTION_ADD = "com.hellosanket.sol.alarmsv.ADD";
+    private static final String ACTION_CLEAR = "com.hellosanket.sol.alarmsvc.CLEAR";
+    private static final String ACTION_SHOW = "com.hellosanket.sol.alarmsvc.SHOW";
     private static final String EXTRA_OFFSET = "com.hellosanket.sol.extra.OFFSET";
     private static final String EXTRA_ALARM_TYPE = "com.hellosanket.sol.extra.ALARM_TYPE";
     private final String TAG = "AlarmIntentSvc";
@@ -45,6 +49,8 @@ public class AlarmIntentService extends IntentService {
                 int offset = intent.getIntExtra(EXTRA_OFFSET, -1);
                 int alarmType = intent.getIntExtra(EXTRA_ALARM_TYPE, -1);
                 handleActionAdd(alarmType, offset);
+            } else if (ACTION_SHOW.equals(action)) {
+                L.d(TAG, "yay alarm");
             }
         }
     }
@@ -59,6 +65,23 @@ public class AlarmIntentService extends IntentService {
                 Calendar cal = dataHelper.getCalFor("sunrise");
                 if (cal != null) {
                     L.d(TAG, "Got calendar for sunrise " + cal);
+                    MainService.setAlarm(getApplicationContext());
+
+                    Intent myintent = new Intent(ACTION_SHOW);
+                    PendingIntent pendingIntent = PendingIntent.getService(getApplicationContext(),
+                            3141, myintent, PendingIntent.FLAG_CANCEL_CURRENT);
+
+                    // TEST
+                    AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+                    Calendar rightNow = new GregorianCalendar();
+
+                    rightNow.add(Calendar.SECOND, 20);
+
+                    // We need to ensure alarm fires even if device not awake
+                    alarmManager.set(AlarmManager.RTC_WAKEUP, rightNow.getTimeInMillis(), pendingIntent);
+
+                    L.d(TAG, "Set alarm for " + rightNow.getTime());
+
                 } else {
                     L.e(TAG, "Failed to get sunrise cal object, no alarm set");
                 }

@@ -1,6 +1,7 @@
 package com.hellosanket.sol;
 
 import android.Manifest;
+import android.app.PendingIntent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -58,7 +59,6 @@ public class MainActivity extends AppCompatActivity implements
             // TODO clear alarm
         }
     }
-
 
     /*-------------------------------- OVERRIDDEN METHODS ------------------------------------*/
     @Override
@@ -175,7 +175,6 @@ public class MainActivity extends AppCompatActivity implements
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
                     L.d(TAG,"Granted Permission");
                     MainService.init(getApplicationContext());
                 } else {
@@ -201,7 +200,6 @@ public class MainActivity extends AppCompatActivity implements
             mSunsetTimeTextView.setText(getString(R.string.main_activity_sunset_time_leader) + " " +
                     sharedPreferences.getString(key, "<default>"));
         }
-
     }
 
     @Override
@@ -234,7 +232,5 @@ public class MainActivity extends AppCompatActivity implements
                 // TODO clear alarm
             }
         }
-
     }
-
 }

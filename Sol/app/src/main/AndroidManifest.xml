@@ -29,13 +29,21 @@
         <service
             android:name=".MainService"
             android:enabled="true"
-            android:exported="false" />
+            android:exported="false" >
+            <intent-filter>
+                <action android:name="com.hellosanket.sol.show_alarm" />
+            </intent-filter>
+        </service>
         <service
             android:name=".SolarDataIntentService"
             android:exported="false" />
         <service
             android:name=".AlarmIntentService"
-            android:exported="false"></service>
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.hellosanket.sol.alarmsvc.SHOW" />
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>

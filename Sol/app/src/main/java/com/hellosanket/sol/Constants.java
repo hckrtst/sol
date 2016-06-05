@@ -7,6 +7,7 @@ public final class Constants {
     public static final String PACKAGE_NAME =
             "com.hellosanket.sol";
     public static final int PERMISSIONS_REQUEST_LOCATION = 223;
+    public static final int ALARM_TOKEN = 314;
 
     public static final String SOLAR_DATA_INTENT_LOC_EXTRA = "loc";
 
