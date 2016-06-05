@@ -65,11 +65,15 @@ public class AlarmIntentService extends IntentService {
                 Calendar cal = dataHelper.getCalFor("sunrise");
                 if (cal != null) {
                     L.d(TAG, "Got calendar for sunrise " + cal);
-                    MainService.setAlarm(getApplicationContext());
 
                     Intent myintent = new Intent(ACTION_SHOW);
                     PendingIntent pendingIntent = PendingIntent.getService(getApplicationContext(),
-                            3141, myintent, PendingIntent.FLAG_CANCEL_CURRENT);
+                            Constants.ALARM_TOKEN, myintent, PendingIntent.FLAG_CANCEL_CURRENT);
+
+                    // TODO
+                    // if we are already past the alarm time then we
+                    // need to get the alarm for the next day
+                    // based on the updated event time for that day
 
                     // TEST
                     AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);

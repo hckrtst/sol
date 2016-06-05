@@ -30,9 +30,6 @@
             android:name=".MainService"
             android:enabled="true"
             android:exported="false" >
-            <intent-filter>
-                <action android:name="com.hellosanket.sol.show_alarm" />
-            </intent-filter>
         </service>
         <service
             android:name=".SolarDataIntentService"

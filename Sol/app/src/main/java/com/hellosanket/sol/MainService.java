@@ -24,8 +24,6 @@ public class MainService extends Service {
     private GClient mGClient;
     public final static String ACTION_GET_SOLAR_TIMES = "sol.mainservice.get_solar_times";
     public final static String ACTION_LOC_PERM_GRANTED = "sol.mainservice.loc_perm_granted";
-    public final static String ACTION_SHOW_ALARM = "com.hellosanket.sol.show_alarm";
-    public final static String ACTION_SET_ALARM = "sol.mainservice.set_alarm";
 
     /*** private methods ***/
 
@@ -56,24 +54,6 @@ public class MainService extends Service {
                 }
             } else if (ACTION_LOC_PERM_GRANTED.equals(intent.getAction())) {
                 mGClient.build();
-            } else if (ACTION_SET_ALARM.equals(intent.getAction())) {
-                Intent myintent = new Intent(MainService.ACTION_SHOW_ALARM);
-                PendingIntent pendingIntent = PendingIntent.getService(getApplicationContext(),
-                        Constants.ALARM_TOKEN, myintent, PendingIntent.FLAG_CANCEL_CURRENT);
-
-                // TEST
-                AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-                Calendar rightNow = new GregorianCalendar();
-
-                rightNow.add(Calendar.SECOND, 40);
-
-                // We need to ensure alarm fires even if device not awake
-                alarmManager.set(AlarmManager.RTC_WAKEUP, rightNow.getTimeInMillis(), pendingIntent);
-
-                L.d(TAG, "Set alarm for " + rightNow.getTime());
-
-            } else if(ACTION_SHOW_ALARM.equals(intent.getAction())) {
-                L.d(TAG, "Now showing: your alarm");
             }
         }
         return Service.START_NOT_STICKY;
@@ -96,13 +76,6 @@ public class MainService extends Service {
         Intent intent = new Intent(context, MainService.class);
         intent.setAction(MainService.ACTION_LOC_PERM_GRANTED);
         context.startService(intent);
-    }
-
-    public static void setAlarm(Context context) {
-        Intent myintent = new Intent(context, MainService.class);
-        myintent.setAction(MainService.ACTION_SET_ALARM);
-        context.startService(myintent);
-
     }
 
     /** Inner Classes **/
