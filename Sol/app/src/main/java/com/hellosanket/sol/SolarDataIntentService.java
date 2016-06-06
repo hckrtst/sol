@@ -10,6 +10,7 @@ import com.luckycatlabs.sunrisesunset.dto.MyLocation;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.SimpleTimeZone;
 
 /**
@@ -63,8 +64,24 @@ public class SolarDataIntentService extends IntentService {
                     new Double(location.getLongitude()).toString());
             String timeZone = SimpleTimeZone.getDefault().getID();
             SunriseSunsetCalculator calculator = new SunriseSunsetCalculator(loc, timeZone);
-            Calendar sunriseCal = calculator.getOfficialSunriseCalendarForDate(Calendar.getInstance());
-            Calendar sunsetCal = calculator.getOfficialSunsetCalendarForDate(Calendar.getInstance());
+            Calendar now = new GregorianCalendar();
+            Calendar sunriseCal = calculator.getOfficialSunriseCalendarForDate(now);
+            Calendar sunsetCal = calculator.getOfficialSunsetCalendarForDate(now);
+
+            // if now is past sunrise then we
+            // need next sunrise
+            if (now.compareTo(sunriseCal) == 1) {
+                Calendar cal = new GregorianCalendar();
+                cal.add(Calendar.DAY_OF_WEEK, 1);
+                sunriseCal = calculator.getOfficialSunriseCalendarForDate(cal);
+            }
+
+            // if now is past sunset then we need next sunset
+            if (now.compareTo(sunsetCal) == 1) {
+                Calendar cal = new GregorianCalendar();
+                cal.add(Calendar.DAY_OF_WEEK, 1);
+                sunsetCal = calculator.getOfficialSunsetCalendarForDate(cal);
+            }
 
             String sunrise = getPrettyTime(sunriseCal);
             String sunset = getPrettyTime(sunsetCal);
@@ -79,7 +96,7 @@ public class SolarDataIntentService extends IntentService {
             dataHelper.setCalFor("sunset", sunsetCal);
 
         } catch (NullPointerException e) {
-            L.e(TAG, "failed to get lat long");
+            L.e(TAG, "Null location");
         }
     }
 
