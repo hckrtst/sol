@@ -4,7 +4,9 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 /**
- * Created by sanket on 5/23/16.
+ * A wrapper class that abstracts getting and setting
+ * data.
+ *
  */
 public class DataWrapper {
     private static SharedPreferences pref;
@@ -66,6 +68,7 @@ public class DataWrapper {
         return pref.getString(key, default_value);
     }
 
+    /* For future use
     public static void savelong(final Context context,
                                   final String db,
                                   final String key,
@@ -94,8 +97,10 @@ public class DataWrapper {
         }
         return pref.getLong(key, default_value);
     }
+    */
 
-    public static void registerListener(final Context context, final String db, final SharedPreferences.OnSharedPreferenceChangeListener clientInstance) {
+    public static void registerListener(final Context context, final String db,
+                                        final SharedPreferences.OnSharedPreferenceChangeListener clientInstance) {
         if (pref == null) {
             pref = context
                     .getApplicationContext()
@@ -103,6 +108,5 @@ public class DataWrapper {
         }
         pref.registerOnSharedPreferenceChangeListener(clientInstance);
     }
-
 
 }

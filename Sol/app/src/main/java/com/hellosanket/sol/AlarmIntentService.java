@@ -2,12 +2,18 @@ package com.hellosanket.sol;
 
 import android.app.AlarmManager;
 import android.app.IntentService;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.TaskStackBuilder;
 import android.content.Intent;
 import android.content.Context;
+import android.graphics.Color;
+import android.media.RingtoneManager;
+import android.support.v7.app.NotificationCompat;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
 
 /**
@@ -51,6 +57,36 @@ public class AlarmIntentService extends IntentService {
                 handleActionAdd(alarmType, offset);
             } else if (ACTION_SHOW.equals(action)) {
                 L.d(TAG, "yay alarm");
+
+                /* Allow notification to launch main activity */
+                Intent mainIntent = new Intent(this, MainActivity.class);
+
+                /* start a back stack to allow us to come back to home screen */
+                TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+                stackBuilder.addParentStack(MainActivity.class);
+                stackBuilder.addNextIntent(mainIntent);
+                PendingIntent pendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+
+                NotificationCompat.Builder notifBuilder = (NotificationCompat.Builder) new NotificationCompat.Builder(getApplicationContext())
+                        .setSmallIcon(R.drawable.ic_stat_action_alarm)
+                        .setContentTitle("Sol")
+                        .setContentText("Sunrise soon!")
+                        .setCategory(NotificationCompat.CATEGORY_ALARM)
+                        .setColor(Color.GRAY)
+                        .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM))
+                        .setContentIntent(pendingIntent);
+
+                NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                notificationManager.notify(1234, notifBuilder.build());
+
+                // set tomorrow's alarm immediately
+                /*
+                Date date = new Date();
+                Calendar calendar = new GregorianCalendar();
+                calendar.setTime(date);
+                calendar.add(Calendar.DAY_OF_WEEK, 1);
+                */
+                //L.d(TAG, "next alarm on " + calendar.getTime());
             }
         }
     }
@@ -64,27 +100,21 @@ public class AlarmIntentService extends IntentService {
             case Constants.ALARM_TYPE_SUNRISE: {
                 Calendar cal = dataHelper.getCalFor("sunrise");
                 if (cal != null) {
-                    L.d(TAG, "Got calendar for sunrise " + cal);
+                    L.d(TAG, "Sunrise is at " + sdf.format(cal.getTime()));
 
-                    Intent myintent = new Intent(ACTION_SHOW);
-                    PendingIntent pendingIntent = PendingIntent.getService(getApplicationContext(),
-                            Constants.ALARM_TOKEN, myintent, PendingIntent.FLAG_CANCEL_CURRENT);
+                    // subtract minutes
+                    cal.add(Calendar.MINUTE, -1*offset);
 
-                    // TODO
-                    // if we are already past the alarm time then we
-                    // need to get the alarm for the next day
-                    // based on the updated event time for that day
-
-                    // TEST
+                    // TODO refactor into common func
                     AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-                    Calendar rightNow = new GregorianCalendar();
-
-                    rightNow.add(Calendar.SECOND, 20);
+                    Intent myIntent = new Intent(ACTION_SHOW);
+                    PendingIntent pendingIntent = PendingIntent.getService(getApplicationContext(),
+                            Constants.ALARM_TOKEN+2, myIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
                     // We need to ensure alarm fires even if device not awake
-                    alarmManager.set(AlarmManager.RTC_WAKEUP, rightNow.getTimeInMillis(), pendingIntent);
+                    alarmManager.set(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), pendingIntent);
 
-                    L.d(TAG, "Set alarm for " + rightNow.getTime());
+                    L.d(TAG, "Set sunrise reminder for " + sdf.format(cal.getTime()));
 
                 } else {
                     L.e(TAG, "Failed to get sunrise cal object, no alarm set");
@@ -95,7 +125,23 @@ public class AlarmIntentService extends IntentService {
             case Constants.ALARM_TYPE_SUNSET: {
                 Calendar cal = dataHelper.getCalFor("sunset");
                 if (cal != null) {
-                    L.d(TAG, "Got calendar for sunset " + cal);
+                    L.d(TAG, "Sunset at " + sdf.format(cal.getTime()));
+
+                    // subtract minutes
+                    cal.add(Calendar.MINUTE, -1*offset);
+
+                    // TODO refactor into common func
+                    AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+                    Intent myIntent = new Intent(ACTION_SHOW);
+                    PendingIntent pendingIntent = PendingIntent.getService(getApplicationContext(),
+                            Constants.ALARM_TOKEN, myIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+
+                    // We need to ensure alarm fires even if device not awake
+                    alarmManager.set(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), pendingIntent);
+
+                    L.d(TAG, "Set sunset reminder for " + sdf.format(cal.getTime()));
+
+
                 } else {
                     L.e(TAG, "Failed to get sunset cal object, no alarm set");
                 }

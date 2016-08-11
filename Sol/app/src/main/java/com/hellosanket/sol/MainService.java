@@ -13,6 +13,7 @@ import android.os.IBinder;
 import android.support.v4.app.ActivityCompat;
 
 import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 
@@ -76,6 +77,9 @@ public class MainService extends Service {
         Intent intent = new Intent(context, MainService.class);
         intent.setAction(MainService.ACTION_LOC_PERM_GRANTED);
         context.startService(intent);
+
+        L.d(TAG, "Google play Availability = " +
+                GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context));
     }
 
     /** Inner Classes **/
@@ -86,7 +90,6 @@ public class MainService extends Service {
         private GoogleApiClient mGoogleApiClient;
 
         public GClient() {
-
         }
         public synchronized void build() {
             if (mGoogleApiClient != null) return;

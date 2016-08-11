@@ -5,7 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created by sanket on 6/1/16.
+ * Central store of computed
+ * calendar objects for sunrise and sunset
  */
 public class CalendarDataHelper {
     private Map<String, Calendar> data = new HashMap<>();
@@ -19,8 +20,11 @@ public class CalendarDataHelper {
     private CalendarDataHelper() {
     }
 
+    // TODO
+    // Does it make sense to always clone? It will prevent modification of the data
+    // but will need to see if this causes too many GC runs
     synchronized Calendar getCalFor(String key) {
-        return data.get(key);
+        return (Calendar)data.get(key).clone();
     }
 
     synchronized void setCalFor(String key, Calendar value) {
