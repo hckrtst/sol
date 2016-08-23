@@ -211,7 +211,7 @@ public class MainActivity extends AppCompatActivity implements
                 DataWrapper.saveInt(getApplicationContext(),
                         Constants.SOL_DB, Constants.SUNRISE_ALARM_OFFSET_KEY, offset);
                 AlarmIntentService.startActionAdd(getApplicationContext(),
-                        Constants.ALARM_TYPE_SUNRISE,
+                        Constants.SolarEvents.SUNRISE,
                         offset);
             } else {
                 DataWrapper.saveInt(getApplicationContext(),
@@ -224,7 +224,7 @@ public class MainActivity extends AppCompatActivity implements
                 DataWrapper.saveInt(getApplicationContext(),
                         Constants.SOL_DB, Constants.SUNSET_ALARM_OFFSET_KEY, offset);
                 AlarmIntentService.startActionAdd(getApplicationContext(),
-                        Constants.ALARM_TYPE_SUNSET,
+                        Constants.SolarEvents.SUNSET,
                         offset);
             } else {
                 DataWrapper.saveInt(getApplicationContext(),

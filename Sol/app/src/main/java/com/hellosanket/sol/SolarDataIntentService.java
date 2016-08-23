@@ -92,8 +92,8 @@ public class SolarDataIntentService extends IntentService {
                     Constants.SOL_DB, Constants.SUNSET_TIME_TEXT_KEY, sunset);
 
             CalendarDataHelper dataHelper = CalendarDataHelper.getInstance();
-            dataHelper.setCalFor("sunrise", sunriseCal);
-            dataHelper.setCalFor("sunset", sunsetCal);
+            dataHelper.setCalFor(CalendarDataHelper.sunrise_key, sunriseCal);
+            dataHelper.setCalFor(CalendarDataHelper.sunset_key, sunsetCal);
 
         } catch (NullPointerException e) {
             L.e(TAG, "Null location");

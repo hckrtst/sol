@@ -7,7 +7,9 @@ public final class Constants {
     public static final String PACKAGE_NAME =
             "com.hellosanket.sol";
     public static final int PERMISSIONS_REQUEST_LOCATION = 223;
-    public static final int ALARM_TOKEN = 314;
+    public static final int SUNRISE_ALARM_TOKEN = 23908;
+    public static final int SUNSET_ALARM_TOKEN = 24569;
+    public static final int NOTIF_TOKEN = 39893;
 
     public static final String SOLAR_DATA_INTENT_LOC_EXTRA = "loc";
 
@@ -20,5 +22,9 @@ public final class Constants {
     public static final short ALARM_TYPE_SUNRISE = 1;
     public static final short ALARM_TYPE_SUNSET = 2;
 
+    public enum SolarEvents{
+      SUNRISE,
+      SUNSET
+    };
 
 }
