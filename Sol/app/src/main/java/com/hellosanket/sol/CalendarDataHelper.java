@@ -23,7 +23,7 @@ public class CalendarDataHelper {
     // TODO
     // Does it make sense to always clone? It will prevent modification of the data
     // but will need to see if this causes too many GC runs
-    synchronized Calendar getCalFor(String key) {
+    synchronized Calendar getCalFor(String key) throws NullPointerException{
         return (Calendar)data.get(key).clone();
     }
 

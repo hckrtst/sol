@@ -1,22 +1,17 @@
 package com.hellosanket.sol;
 
-import junit.framework.TestCase;
-
-import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
-
 
 import java.util.Calendar;
 
-import static org.junit.Assert.*;
-import static org.junit.matchers.JUnitMatchers.hasItem;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * To work on unit tests, switch the Test Artifact in the Build Variants view.
  */
-public class SolUnitTest {
+public class CalendarDataHelperTest {
     @Test
     public void check_calendar_data_integrity() throws Exception {
         CalendarDataHelper helper = CalendarDataHelper.getInstance();

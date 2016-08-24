@@ -1,8 +1,6 @@
 package com.hellosanket.sol;
 
 import android.Manifest;
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -16,9 +14,6 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
-
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 
 public class MainService extends Service {
     private final static String TAG = "MainService";

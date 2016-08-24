@@ -23,11 +23,11 @@ import java.util.StringTokenizer;
  * a service on a separate handler thread.
  */
 public class AlarmIntentService extends IntentService {
-    private static final String ACTION_ADD = "com.hellosanket.sol.alarmsv.ADD";
+    protected static final String ACTION_ADD = "com.hellosanket.sol.alarmsvc.ADD";
     private static final String ACTION_CLEAR = "com.hellosanket.sol.alarmsvc.CLEAR";
     private static final String ACTION_SHOW = "com.hellosanket.sol.alarmsvc.SHOW";
-    private static final String EXTRA_OFFSET = "com.hellosanket.sol.extra.OFFSET";
-    private static final String EXTRA_ALARM_TYPE = "com.hellosanket.sol.extra.ALARM_TYPE";
+    protected static final String EXTRA_OFFSET = "com.hellosanket.sol.extra.OFFSET";
+    protected static final String EXTRA_ALARM_TYPE = "com.hellosanket.sol.extra.ALARM_TYPE";
     private final String TAG = "AlarmIntentSvc";
 
     public AlarmIntentService() {
@@ -78,29 +78,35 @@ public class AlarmIntentService extends IntentService {
     private void handleActionAdd(Constants.SolarEvents alarmType, int offset) {
         CalendarDataHelper dataHelper = CalendarDataHelper.getInstance();
         Calendar now = Calendar.getInstance();
-        SimpleDateFormat sdf = new SimpleDateFormat("LLL dd hh:mm a z");
-        L.d(TAG, "Now is " + sdf.format(now.getTime()));
-        switch (alarmType) {
-            case SUNRISE: {
-                Calendar cal = dataHelper.getCalFor(CalendarDataHelper.sunrise_key);
-                if (scheduleAlarm(cal, offset, Constants.SolarEvents.SUNRISE)) {
-                    L.d(TAG, "Set sunrise reminder for " + sdf.format(cal.getTime()));
-                } else {
-                    L.e(TAG, "Failed to get sunrise cal object, no alarm set");
+        // FIXME need to check why roboelectric get an exception when formatting with LLL
+        //SimpleDateFormat sdf = new SimpleDateFormat("LLL dd hh:mm a z");
+        SimpleDateFormat sdf = new SimpleDateFormat("dd hh:mm a z");
+        try {
+            //L.d(TAG, "Now is " + sdf.format(now.getTime()));
+            switch (alarmType) {
+                case SUNRISE: {
+                    Calendar cal = dataHelper.getCalFor(CalendarDataHelper.sunrise_key);
+                    if (scheduleAlarm(cal, offset, Constants.SolarEvents.SUNRISE)) {
+                        L.d(TAG, "Set sunrise reminder for " + sdf.format(cal.getTime()));
+                    } else {
+                        L.e(TAG, "Failed to get sunrise cal object, no alarm set");
+                    }
+                    break;
                 }
-                break;
-            }
-            case SUNSET: {
-                Calendar cal = dataHelper.getCalFor(CalendarDataHelper.sunset_key);
-                if (scheduleAlarm(cal, offset, Constants.SolarEvents.SUNSET)) {
-                    L.d(TAG, "Set sunset reminder for " + sdf.format(cal.getTime()));
-                } else {
-                    L.e(TAG, "Failed to get sunset cal object, no alarm set");
+                case SUNSET: {
+                    Calendar cal = dataHelper.getCalFor(CalendarDataHelper.sunset_key);
+                    if (scheduleAlarm(cal, offset, Constants.SolarEvents.SUNSET)) {
+                        L.d(TAG, "Set sunset reminder for " + sdf.format(cal.getTime()));
+                    } else {
+                        L.e(TAG, "Failed to get sunset cal object, no alarm set");
+                    }
+                    break;
                 }
-                break;
+                default:
+                    L.e(TAG, "Invalid alarm type!");
             }
-            default:
-                L.e(TAG, "Invalid alarm type!");
+        }catch (NullPointerException e) {
+            L.e(TAG, "Whoops");
         }
     }
 
