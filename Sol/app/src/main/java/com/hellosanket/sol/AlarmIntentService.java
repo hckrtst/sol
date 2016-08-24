@@ -78,26 +78,22 @@ public class AlarmIntentService extends IntentService {
     private void handleActionAdd(Constants.SolarEvents alarmType, int offset) {
         CalendarDataHelper dataHelper = CalendarDataHelper.getInstance();
         Calendar now = Calendar.getInstance();
-        // FIXME need to check why roboelectric get an exception when formatting with LLL
+        // FIXME need to check why roboelectric gets an exception when formatting with L
         //SimpleDateFormat sdf = new SimpleDateFormat("LLL dd hh:mm a z");
-        SimpleDateFormat sdf = new SimpleDateFormat("dd hh:mm a z");
+        SimpleDateFormat sdf = new SimpleDateFormat("MM dd hh:mm a z");
         try {
-            //L.d(TAG, "Now is " + sdf.format(now.getTime()));
+            L.d(TAG, "Now is " + sdf.format(now.getTime()));
             switch (alarmType) {
                 case SUNRISE: {
                     Calendar cal = dataHelper.getCalFor(CalendarDataHelper.sunrise_key);
-                    if (scheduleAlarm(cal, offset, Constants.SolarEvents.SUNRISE)) {
-                        L.d(TAG, "Set sunrise reminder for " + sdf.format(cal.getTime()));
-                    } else {
+                    if (!scheduleAlarm(cal, offset, Constants.SolarEvents.SUNRISE)) {
                         L.e(TAG, "Failed to get sunrise cal object, no alarm set");
                     }
                     break;
                 }
                 case SUNSET: {
                     Calendar cal = dataHelper.getCalFor(CalendarDataHelper.sunset_key);
-                    if (scheduleAlarm(cal, offset, Constants.SolarEvents.SUNSET)) {
-                        L.d(TAG, "Set sunset reminder for " + sdf.format(cal.getTime()));
-                    } else {
+                    if (!scheduleAlarm(cal, offset, Constants.SolarEvents.SUNSET)) {
                         L.e(TAG, "Failed to get sunset cal object, no alarm set");
                     }
                     break;
@@ -143,7 +139,7 @@ public class AlarmIntentService extends IntentService {
 
         // set tomorrow's alarm immediately
         Calendar now = Calendar.getInstance();
-        SimpleDateFormat sdf = new SimpleDateFormat("LLL dd hh:mm a z");
+        SimpleDateFormat sdf = new SimpleDateFormat("dd hh:mm a z");
         L.d(TAG, "Now is " + sdf.format(now.getTime()));
 
         // TODO get the freshest alarm for tomorrow and set it
@@ -153,7 +149,7 @@ public class AlarmIntentService extends IntentService {
     /**
      *
      * @param cal
-     * @param offset
+     * @param offset in minutes
      * @param evt
      * @return
      * @throws IllegalArgumentException
@@ -180,9 +176,17 @@ public class AlarmIntentService extends IntentService {
                 L.w(TAG, "Cannot set alarm of unknown type");
         }
         if (pendingIntent != null) {
+            // offset is subtracted to ensure alarm fires in advance
+            cal.add(Calendar.MINUTE, -1*offset);
+            L.d(TAG, "Set alarm for " + getPrettyTime(cal));
             // We need to ensure alarm fires even if device not awake
             alarmManager.set(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), pendingIntent);
         }
         return true;
+    }
+
+    private String getPrettyTime(final Calendar cal) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd hh:mm a z");
+        return simpleDateFormat.format(cal.getTime());
     }
 }

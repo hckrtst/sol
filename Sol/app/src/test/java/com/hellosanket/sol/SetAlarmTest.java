@@ -34,6 +34,7 @@ public class SetAlarmTest {
     AlarmIntentService service;
     CalendarDataHelper dataHelper;
     SimpleDateFormat sdf;
+    Calendar sunriseCal;
 
 
     @Before
@@ -43,33 +44,36 @@ public class SetAlarmTest {
         shadowAlarmManager = shadowOf(alarmManager);
         service = Robolectric.setupService(AlarmIntentService.class);
         dataHelper = CalendarDataHelper.getInstance();
-        Calendar calendar = new GregorianCalendar();
-        calendar.add(Calendar.DAY_OF_WEEK, 1);
-        sdf = new SimpleDateFormat("dd hh:mm a z");
-        System.out.println("Sunrise at " + sdf.format(calendar.getTime()));
-        dataHelper.setCalFor(CalendarDataHelper.sunrise_key, calendar);
+
+        // initialize data with some future value
+        sunriseCal = new GregorianCalendar();
+        sunriseCal.add(Calendar.DATE, 1);
+        sdf = new SimpleDateFormat("MM dd hh:mm a z");
+        System.out.println("Set mock initial sunrise time = " + sdf.format(sunriseCal.getTime()));
+        dataHelper.setCalFor(CalendarDataHelper.sunrise_key, sunriseCal);
 
     }
 
     @Test
     public void setSunriseAlarm(){
+        int offset = 10;
         Intent intent = new Intent(context, AlarmIntentService.class);
         intent.setAction(AlarmIntentService.ACTION_ADD);
-        intent.putExtra(AlarmIntentService.EXTRA_OFFSET, 10);
+        intent.putExtra(AlarmIntentService.EXTRA_OFFSET, offset);
         intent.putExtra(AlarmIntentService.EXTRA_ALARM_TYPE, Constants.SolarEvents.SUNRISE);
 
         service.onHandleIntent(intent);
 
         ShadowAlarmManager.ScheduledAlarm scheduledAlarm = shadowAlarmManager.getNextScheduledAlarm();
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(scheduledAlarm.triggerAtTime);
+        Calendar scheduledCal = new GregorianCalendar();
+        scheduledCal.setTimeInMillis(scheduledAlarm.triggerAtTime);
 
-        System.out.println("Set = " + sdf.format(calendar.getTime()));
+        System.out.println("Set sunrise alarm for = " + sdf.format(scheduledCal.getTime()));
 
-        Calendar expected = new GregorianCalendar();
-        calendar.add(expected.DAY_OF_WEEK, 1);
+        Calendar expected = (Calendar) sunriseCal.clone();
+        expected.add(Calendar.MINUTE, -1*offset);
 
         //ShadowPendingIntent shadowPendingIntent = shadowOf(scheduledAlarm.operation);
-        assertEquals(calendar.getTime(), expected.getTime());
+        assertEquals(scheduledCal.getTime(), expected.getTime());
     }
 }
