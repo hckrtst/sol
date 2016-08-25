@@ -35,6 +35,7 @@ public class SetAlarmTest {
     CalendarDataHelper dataHelper;
     SimpleDateFormat sdf;
     Calendar sunriseCal;
+    Calendar sunsetCal;
 
 
     @Before
@@ -52,18 +53,20 @@ public class SetAlarmTest {
         System.out.println("Set mock initial sunrise time = " + sdf.format(sunriseCal.getTime()));
         dataHelper.setCalFor(CalendarDataHelper.sunrise_key, sunriseCal);
 
+        sunsetCal = new GregorianCalendar();
+        sunsetCal.add(Calendar.DATE, 2);
+        sdf = new SimpleDateFormat("MM dd hh:mm a z");
+        System.out.println("Set mock initial sunset time = " + sdf.format(sunsetCal.getTime()));
+        dataHelper.setCalFor(CalendarDataHelper.sunset_key, sunsetCal);
+
+
     }
 
     @Test
-    public void setSunriseAlarm(){
+    public void testSunriseAlarm(){
         int offset = 10;
-        Intent intent = new Intent(context, AlarmIntentService.class);
-        intent.setAction(AlarmIntentService.ACTION_ADD);
-        intent.putExtra(AlarmIntentService.EXTRA_OFFSET, offset);
-        intent.putExtra(AlarmIntentService.EXTRA_ALARM_TYPE, Constants.SolarEvents.SUNRISE);
 
-        service.onHandleIntent(intent);
-
+        setAlarm(offset, Constants.SolarEvents.SUNRISE);
         ShadowAlarmManager.ScheduledAlarm scheduledAlarm = shadowAlarmManager.getNextScheduledAlarm();
         Calendar scheduledCal = new GregorianCalendar();
         scheduledCal.setTimeInMillis(scheduledAlarm.triggerAtTime);
@@ -75,5 +78,34 @@ public class SetAlarmTest {
 
         //ShadowPendingIntent shadowPendingIntent = shadowOf(scheduledAlarm.operation);
         assertEquals(scheduledCal.getTime(), expected.getTime());
+
+    }
+
+    @Test
+    public void testSunsetAlarm(){
+        int offset = 20;
+
+        setAlarm(offset, Constants.SolarEvents.SUNSET);
+        ShadowAlarmManager.ScheduledAlarm scheduledAlarm = shadowAlarmManager.getNextScheduledAlarm();
+        Calendar scheduledCal = new GregorianCalendar();
+        scheduledCal.setTimeInMillis(scheduledAlarm.triggerAtTime);
+
+        System.out.println("Set sunset alarm for = " + sdf.format(scheduledCal.getTime()));
+
+        Calendar expected = (Calendar) sunsetCal.clone();
+        expected.add(Calendar.MINUTE, -1*offset);
+
+        //ShadowPendingIntent shadowPendingIntent = shadowOf(scheduledAlarm.operation);
+        assertEquals(scheduledCal.getTime(), expected.getTime());
+
+    }
+
+
+    private void setAlarm(int offset, Constants.SolarEvents event) {
+        Intent intent = new Intent(context, AlarmIntentService.class);
+        intent.setAction(AlarmIntentService.ACTION_ADD);
+        intent.putExtra(AlarmIntentService.EXTRA_OFFSET, offset);
+        intent.putExtra(AlarmIntentService.EXTRA_ALARM_TYPE, event);
+        service.onHandleIntent(intent);
     }
 }
