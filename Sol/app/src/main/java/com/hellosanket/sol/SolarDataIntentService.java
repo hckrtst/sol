@@ -31,10 +31,12 @@ public class SolarDataIntentService extends IntentService {
      * @see IntentService
      */
 
-    public static void startComputeService(final Context context, final Location location) {
+    public static void startComputeService(final Context context, final Location location,
+                                           final Calendar calendar) {
         Intent intent = new Intent(context, SolarDataIntentService.class);
         intent.setAction(ACTION_COMPUTE);
         intent.putExtra(Constants.SOLAR_DATA_INTENT_LOC_EXTRA, location);
+        intent.putExtra(Constants.SOLAR_DATA_INTENT_CAL_EXTRA, calendar);
         context.startService(intent);
     }
 
@@ -44,8 +46,9 @@ public class SolarDataIntentService extends IntentService {
             final String action = intent.getAction();
             if (ACTION_COMPUTE.equals(action)) {
                 Location location = intent.getParcelableExtra(Constants.SOLAR_DATA_INTENT_LOC_EXTRA);
+                Calendar calendar = intent.getParcelableExtra(Constants.SOLAR_DATA_INTENT_CAL_EXTRA);
                 try {
-                    handleActionCompute(location);
+                    handleActionCompute(location, calendar);
                 } catch (NullPointerException e) {
                     L.e(TAG, "failed to get location");
                 }
@@ -57,28 +60,29 @@ public class SolarDataIntentService extends IntentService {
      * Handle action Compute in the provided background thread with the provided
      * parameters.
      */
-    private void handleActionCompute(final Location location) {
+    private void handleActionCompute(final Location location, Calendar eventCal) {
         MyLocation loc;
         try {
             loc = new MyLocation(new Double(location.getLatitude()).toString(),
                     new Double(location.getLongitude()).toString());
             String timeZone = SimpleTimeZone.getDefault().getID();
             SunriseSunsetCalculator calculator = new SunriseSunsetCalculator(loc, timeZone);
-            Calendar now = new GregorianCalendar();
-            Calendar sunriseCal = calculator.getOfficialSunriseCalendarForDate(now);
-            Calendar sunsetCal = calculator.getOfficialSunsetCalendarForDate(now);
+            Calendar cal = eventCal;
+            if (cal == null) {
+                cal = new GregorianCalendar();
+            }
+            Calendar sunriseCal = calculator.getOfficialSunriseCalendarForDate(cal);
+            Calendar sunsetCal = calculator.getOfficialSunsetCalendarForDate(cal);
 
-            // if now is past sunrise then we
+            // if time is past sunrise then we
             // need next sunrise
-            if (now.compareTo(sunriseCal) == 1) {
-                Calendar cal = new GregorianCalendar();
+            if (cal.compareTo(sunriseCal) == 1) {
                 cal.add(Calendar.DAY_OF_WEEK, 1);
                 sunriseCal = calculator.getOfficialSunriseCalendarForDate(cal);
             }
 
             // if now is past sunset then we need next sunset
-            if (now.compareTo(sunsetCal) == 1) {
-                Calendar cal = new GregorianCalendar();
+            if (cal.compareTo(sunsetCal) == 1) {
                 cal.add(Calendar.DAY_OF_WEEK, 1);
                 sunsetCal = calculator.getOfficialSunsetCalendarForDate(cal);
             }

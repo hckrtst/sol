@@ -8,27 +8,25 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
-import org.robolectric.RobolectricGradleTestRunner;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowAlarmManager;
-import org.robolectric.shadows.ShadowPendingIntent;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
 import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertTrue;
 import static org.robolectric.Shadows.shadowOf;
 
 /**
  * Created by sanket on 8/23/16.
  */
 
-@RunWith(RobolectricGradleTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class)
-public class SetAlarmTest {
+public class AlarmIntentServiceTest {
     ShadowAlarmManager shadowAlarmManager;
     Context context;
     AlarmIntentService service;

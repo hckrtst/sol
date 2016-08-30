@@ -44,7 +44,7 @@ public class MainService extends Service {
                 // fetch the solar times based on location
                 if (mGClient.getLocation() != null) {
                     SolarDataIntentService.startComputeService(getApplicationContext(),
-                            mGClient.getLocation());
+                            mGClient.getLocation(), null);
                 } else {
                     L.w(TAG, "no location yet");
                 }
