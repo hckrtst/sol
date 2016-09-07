@@ -4,6 +4,8 @@ import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.luckycatlabs.sunrisesunset.SunriseSunsetCalculator;
 import com.luckycatlabs.sunrisesunset.dto.MyLocation;
@@ -17,7 +19,7 @@ import java.util.SimpleTimeZone;
  *
  */
 public class SolarDataIntentService extends IntentService {
-    private static final String ACTION_COMPUTE = "com.hellosanket.sol.action.compute";
+    protected static final String ACTION_COMPUTE = "com.hellosanket.sol.action.compute";
     private SunriseSunsetCalculator mCalculator;
     private static final String TAG = "SolarDataIntentService";
 
@@ -60,7 +62,8 @@ public class SolarDataIntentService extends IntentService {
      * Handle action Compute in the provided background thread with the provided
      * parameters.
      */
-    private void handleActionCompute(final Location location, Calendar eventCal) {
+    private void handleActionCompute(@NonNull final Location location,
+                                     @Nullable Calendar eventCal) {
         MyLocation loc;
         try {
             loc = new MyLocation(new Double(location.getLatitude()).toString(),
@@ -81,8 +84,14 @@ public class SolarDataIntentService extends IntentService {
                 sunriseCal = calculator.getOfficialSunriseCalendarForDate(cal);
             }
 
+
+
             // if now is past sunset then we need next sunset
             if (cal.compareTo(sunsetCal) == 1) {
+                // FIXME this is a bug
+                // we can accidentally increment the day again
+                // It will be cleaner to separate the computations out
+                // for sunrise and sunset
                 cal.add(Calendar.DAY_OF_WEEK, 1);
                 sunsetCal = calculator.getOfficialSunsetCalendarForDate(cal);
             }
@@ -105,7 +114,7 @@ public class SolarDataIntentService extends IntentService {
     }
 
     private String getPrettyTime(Calendar cal) {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("LLL dd hh:mm a z");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM dd hh:mm a z");
         return simpleDateFormat.format(cal.getTime());
     }
 
