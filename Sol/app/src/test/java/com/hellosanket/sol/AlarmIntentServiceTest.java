@@ -3,6 +3,7 @@ package com.hellosanket.sol;
 import android.app.AlarmManager;
 import android.content.Context;
 import android.content.Intent;
+import android.os.SystemClock;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -10,8 +11,10 @@ import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
+import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowAlarmManager;
+import org.robolectric.shadows.ShadowSystemClock;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -57,6 +60,8 @@ public class AlarmIntentServiceTest {
         System.out.println("Set mock initial sunset time = " + sdf.format(sunsetCal.getTime()));
         dataHelper.setCalFor(CalendarDataHelper.sunset_key, sunsetCal);
 
+        // TODO can we set shadow system clock?
+        //ShadowSystemClock clock = Shadows.
 
     }
 
@@ -98,6 +103,13 @@ public class AlarmIntentServiceTest {
 
     }
 
+    @Test
+    public void testRepeatingSunriseAlarm() {
+        doNotification(Constants.SolarEvents.SUNRISE);
+        Calendar nextCal = dataHelper.getCalFor(CalendarDataHelper.sunrise_key);
+        System.out.println("Next sunrise set for " + sdf.format(nextCal.getTime()));
+    }
+
 
     private void setAlarm(int offset, Constants.SolarEvents event) {
         Intent intent = new Intent(context, AlarmIntentService.class);
@@ -105,5 +117,15 @@ public class AlarmIntentServiceTest {
         intent.putExtra(AlarmIntentService.EXTRA_OFFSET, offset);
         intent.putExtra(AlarmIntentService.EXTRA_ALARM_TYPE, event);
         service.onHandleIntent(intent);
+    }
+
+    private void doNotification(Constants.SolarEvents event) {
+        Intent intent = new Intent(context, AlarmIntentService.class);
+        intent.setAction(AlarmIntentService.ACTION_SHOW);
+        intent.putExtra(AlarmIntentService.EXTRA_ALARM_TYPE, Constants.SolarEvents.SUNRISE);
+        service.onHandleIntent(intent);
+
+
+
     }
 }

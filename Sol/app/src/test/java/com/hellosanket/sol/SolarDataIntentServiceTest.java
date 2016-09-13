@@ -57,6 +57,7 @@ public class SolarDataIntentServiceTest {
         System.out.println("Sunrise = " + sdf.format(sunriseCal.getTime()));
         System.out.println("Sunset = " + sdf.format(sunsetCal.getTime()));
 
+        // TODO assert based on known events
 
     }
 }

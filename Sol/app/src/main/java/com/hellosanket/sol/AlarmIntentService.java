@@ -24,8 +24,8 @@ import java.util.StringTokenizer;
  */
 public class AlarmIntentService extends IntentService {
     protected static final String ACTION_ADD = "com.hellosanket.sol.alarmsvc.ADD";
-    private static final String ACTION_CLEAR = "com.hellosanket.sol.alarmsvc.CLEAR";
-    private static final String ACTION_SHOW = "com.hellosanket.sol.alarmsvc.SHOW";
+    protected static final String ACTION_CLEAR = "com.hellosanket.sol.alarmsvc.CLEAR";
+    protected static final String ACTION_SHOW = "com.hellosanket.sol.alarmsvc.SHOW";
     protected static final String EXTRA_OFFSET = "com.hellosanket.sol.extra.OFFSET";
     protected static final String EXTRA_ALARM_TYPE = "com.hellosanket.sol.extra.ALARM_TYPE";
     private final String TAG = "AlarmIntentSvc";
@@ -64,9 +64,22 @@ public class AlarmIntentService extends IntentService {
                 switch (evt) {
                     case SUNRISE:
                         showNotification("Wakey wakey", evt);
+                        // automatically set event for the next day
+                        // TODO stop doing this when user canceled
+                        if (isSunriseAlarmRepeating()) {
+                            Calendar today = new GregorianCalendar();
+                            today.add(Calendar.DAY_OF_WEEK, 1);
+                            // FIXME use stored offset
+                            handleActionAdd(Constants.SolarEvents.SUNRISE, 15);
+                        }
                         break;
                     case SUNSET:
                         showNotification("Enjoy the sunset", evt);
+                        if (isSunsetAlarmRepeating()) {
+                            Calendar today = new GregorianCalendar();
+                            today.add(Calendar.DAY_OF_WEEK, 1);
+                            handleActionAdd(Constants.SolarEvents.SUNSET, 15);
+                        }
                         break;
                     default:
                         L.w(TAG, "cannot display for unknown type");
@@ -141,10 +154,6 @@ public class AlarmIntentService extends IntentService {
         Calendar now = Calendar.getInstance();
         SimpleDateFormat sdf = new SimpleDateFormat("dd hh:mm a z");
         L.d(TAG, "Now is " + sdf.format(now.getTime()));
-
-        // TODO get the freshest alarm for tomorrow and set it
-
-
     }
 
     /**
@@ -189,5 +198,13 @@ public class AlarmIntentService extends IntentService {
     private String getPrettyTime(final Calendar cal) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd hh:mm a z");
         return simpleDateFormat.format(cal.getTime());
+    }
+
+    private boolean isSunriseAlarmRepeating() {
+        return true;
+    }
+
+    private boolean isSunsetAlarmRepeating() {
+        return true;
     }
 }

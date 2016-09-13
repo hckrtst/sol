@@ -80,9 +80,12 @@ public class SolarDataIntentService extends IntentService {
 
             // FIXME this needs to be refactored
             if (event == Constants.SolarEvents.SUNRISE) {
-
                 Calendar sunriseCal = calculator.getOfficialSunriseCalendarForDate(cal);
-                cal.add(Calendar.DAY_OF_WEEK, 1);
+                // if current time is past sunrise time then re-compute next one
+                if (cal.compareTo(sunriseCal) == 1) {
+                    cal.add(Calendar.DAY_OF_WEEK, 1);
+                    sunriseCal = calculator.getOfficialSunriseCalendarForDate(cal);
+                }
                 String sunrise = getPrettyTime(sunriseCal);
                 DataWrapper.saveString(getApplicationContext(),
                         Constants.SOL_DB, Constants.SUNRISE_TIME_TEXT_KEY, sunrise);
@@ -91,7 +94,11 @@ public class SolarDataIntentService extends IntentService {
 
             } else {
                 Calendar sunsetCal = calculator.getOfficialSunsetCalendarForDate(cal);
-                cal.add(Calendar.DAY_OF_WEEK, 1);
+                // if current time is past sunset time then re-compute next one
+                if (cal.compareTo(sunsetCal) == 1) {
+                    cal.add(Calendar.DAY_OF_WEEK, 1);
+                    sunsetCal = calculator.getOfficialSunriseCalendarForDate(cal);
+                }
                 String sunset = getPrettyTime(sunsetCal);
                 DataWrapper.saveString(getApplicationContext(),
                         Constants.SOL_DB, Constants.SUNSET_TIME_TEXT_KEY, sunset);
