@@ -50,7 +50,8 @@ public class SolarDataIntentService extends IntentService {
                 Location location = intent.getParcelableExtra(Constants.SOLAR_DATA_INTENT_LOC_EXTRA);
                 Calendar calendar = intent.getParcelableExtra(Constants.SOLAR_DATA_INTENT_CAL_EXTRA);
                 try {
-                    handleActionCompute(location, calendar);
+                    handleActionCompute(location, calendar, Constants.SolarEvents.SUNRISE);
+                    handleActionCompute(location, calendar, Constants.SolarEvents.SUNSET);
                 } catch (NullPointerException e) {
                     L.e(TAG, "failed to get location");
                 }
@@ -63,8 +64,10 @@ public class SolarDataIntentService extends IntentService {
      * parameters.
      */
     private void handleActionCompute(@NonNull final Location location,
-                                     @Nullable Calendar eventCal) {
+                                     @Nullable Calendar eventCal,
+                                     final Constants.SolarEvents event) {
         MyLocation loc;
+
         try {
             loc = new MyLocation(new Double(location.getLatitude()).toString(),
                     new Double(location.getLongitude()).toString());
@@ -74,40 +77,27 @@ public class SolarDataIntentService extends IntentService {
             if (cal == null) {
                 cal = new GregorianCalendar();
             }
-            Calendar sunriseCal = calculator.getOfficialSunriseCalendarForDate(cal);
-            Calendar sunsetCal = calculator.getOfficialSunsetCalendarForDate(cal);
 
-            // if time is past sunrise then we
-            // need next sunrise
-            if (cal.compareTo(sunriseCal) == 1) {
+            // FIXME this needs to be refactored
+            if (event == Constants.SolarEvents.SUNRISE) {
+
+                Calendar sunriseCal = calculator.getOfficialSunriseCalendarForDate(cal);
                 cal.add(Calendar.DAY_OF_WEEK, 1);
-                sunriseCal = calculator.getOfficialSunriseCalendarForDate(cal);
-            }
+                String sunrise = getPrettyTime(sunriseCal);
+                DataWrapper.saveString(getApplicationContext(),
+                        Constants.SOL_DB, Constants.SUNRISE_TIME_TEXT_KEY, sunrise);
+                CalendarDataHelper dataHelper = CalendarDataHelper.getInstance();
+                dataHelper.setCalFor(CalendarDataHelper.sunrise_key, sunriseCal);
 
-
-
-            // if now is past sunset then we need next sunset
-            if (cal.compareTo(sunsetCal) == 1) {
-                // FIXME this is a bug
-                // we can accidentally increment the day again
-                // It will be cleaner to separate the computations out
-                // for sunrise and sunset
+            } else {
+                Calendar sunsetCal = calculator.getOfficialSunsetCalendarForDate(cal);
                 cal.add(Calendar.DAY_OF_WEEK, 1);
-                sunsetCal = calculator.getOfficialSunsetCalendarForDate(cal);
+                String sunset = getPrettyTime(sunsetCal);
+                DataWrapper.saveString(getApplicationContext(),
+                        Constants.SOL_DB, Constants.SUNSET_TIME_TEXT_KEY, sunset);
+                CalendarDataHelper dataHelper = CalendarDataHelper.getInstance();
+                dataHelper.setCalFor(CalendarDataHelper.sunset_key, sunsetCal);
             }
-
-            String sunrise = getPrettyTime(sunriseCal);
-            String sunset = getPrettyTime(sunsetCal);
-
-            DataWrapper.saveString(getApplicationContext(),
-                    Constants.SOL_DB, Constants.SUNRISE_TIME_TEXT_KEY, sunrise);
-            DataWrapper.saveString(getApplicationContext(),
-                    Constants.SOL_DB, Constants.SUNSET_TIME_TEXT_KEY, sunset);
-
-            CalendarDataHelper dataHelper = CalendarDataHelper.getInstance();
-            dataHelper.setCalFor(CalendarDataHelper.sunrise_key, sunriseCal);
-            dataHelper.setCalFor(CalendarDataHelper.sunset_key, sunsetCal);
-
         } catch (NullPointerException e) {
             L.e(TAG, "Null location");
         }

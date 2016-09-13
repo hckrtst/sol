@@ -24,7 +24,7 @@ public class SolarDataIntentServiceTest {
     Context context;
     SolarDataIntentService service;
     CalendarDataHelper dataHelper;
-    SimpleDateFormat sdf;
+    SimpleDateFormat sdf = new SimpleDateFormat("MM dd hh:mm a z");
     Calendar sunriseCal;
     Calendar sunsetCal;
 
@@ -40,8 +40,8 @@ public class SolarDataIntentServiceTest {
         Location location = new Location("Fake");
         // Use lat-long from your local machine's timezone
         // Not sure how to auto-detect this yet
-        location.setLatitude(40.566624);
-        location.setLongitude(-122.387795);
+        location.setLatitude(32.566624);
+        location.setLongitude(-117.387795);
         System.out.println(location);
 
         Intent intent = new Intent(context, SolarDataIntentService.class);
@@ -50,6 +50,12 @@ public class SolarDataIntentServiceTest {
         intent.putExtra(Constants.SOLAR_DATA_INTENT_CAL_EXTRA, Calendar.getInstance());
 
         service.onHandleIntent(intent);
+
+        dataHelper = CalendarDataHelper.getInstance();
+        sunriseCal = dataHelper.getCalFor(CalendarDataHelper.sunrise_key);
+        sunsetCal = dataHelper.getCalFor(CalendarDataHelper.sunset_key);
+        System.out.println("Sunrise = " + sdf.format(sunriseCal.getTime()));
+        System.out.println("Sunset = " + sdf.format(sunsetCal.getTime()));
 
 
     }
