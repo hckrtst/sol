@@ -15,11 +15,15 @@ import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+
 public class MainService extends Service {
     private final static String TAG = "MainService";
     private GClient mGClient;
     public final static String ACTION_GET_SOLAR_TIMES = "sol.mainservice.get_solar_times";
     public final static String ACTION_LOC_PERM_GRANTED = "sol.mainservice.loc_perm_granted";
+    public final static String ACTION_GET_SOLAR_TIMES_EXTRA_CAL = "sol.mainservice.get_solar_times.cal";
 
     /*** private methods ***/
 
@@ -41,10 +45,11 @@ public class MainService extends Service {
             L.d(TAG, "Got intent = " + intent.getAction());
             if (ACTION_GET_SOLAR_TIMES.equals(intent.getAction())) {
 
-                // fetch the solar times based on location
+                // fetch the solar times based on location and time
                 if (mGClient.getLocation() != null) {
+                    Calendar calendar = intent.getParcelableExtra(ACTION_GET_SOLAR_TIMES_EXTRA_CAL);
                     SolarDataIntentService.startComputeService(getApplicationContext(),
-                            mGClient.getLocation(), null);
+                            mGClient.getLocation(), calendar);
                 } else {
                     L.w(TAG, "no location yet");
                 }
@@ -62,10 +67,16 @@ public class MainService extends Service {
     }
 
     /** static public methods **/
-    public static void getSolarTimes(Context context) {
+    public static void getSolarTimes(Context context, Calendar calendar) {
+        if (calendar == null) {
+            calendar = new GregorianCalendar();
+            // TODO better to enforce this and throw exception?
+        }
         Intent intent = new Intent(context, MainService.class);
         intent.setAction(MainService.ACTION_GET_SOLAR_TIMES);
+        intent.putExtra(ACTION_GET_SOLAR_TIMES_EXTRA_CAL, calendar);
         context.startService(intent);
+
     }
 
     public static void init(Context context) {
@@ -100,7 +111,7 @@ public class MainService extends Service {
         @Override
         public void onConnected(Bundle bundle) {
             L.d(TAG, "Connected to google api service");
-            MainService.getSolarTimes(getApplicationContext());
+            MainService.getSolarTimes(getApplicationContext(), new GregorianCalendar());
 
         }
 

@@ -67,8 +67,9 @@ public class AlarmIntentService extends IntentService {
                         // automatically set event for the next day
                         // TODO stop doing this when user canceled
                         if (isSunriseAlarmRepeating()) {
-                            Calendar today = new GregorianCalendar();
-                            today.add(Calendar.DAY_OF_WEEK, 1);
+                            Calendar cal = new GregorianCalendar();
+                            cal.add(Calendar.DAY_OF_WEEK, 1);
+                            MainService.getSolarTimes(getApplicationContext(), cal);
                             // FIXME use stored offset
                             handleActionAdd(Constants.SolarEvents.SUNRISE, 15);
                         }
@@ -76,8 +77,9 @@ public class AlarmIntentService extends IntentService {
                     case SUNSET:
                         showNotification("Enjoy the sunset", evt);
                         if (isSunsetAlarmRepeating()) {
-                            Calendar today = new GregorianCalendar();
-                            today.add(Calendar.DAY_OF_WEEK, 1);
+                            Calendar cal = new GregorianCalendar();
+                            cal.add(Calendar.DAY_OF_WEEK, 1);
+                            MainService.getSolarTimes(getApplicationContext(), cal);
                             handleActionAdd(Constants.SolarEvents.SUNSET, 15);
                         }
                         break;

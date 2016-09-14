@@ -13,6 +13,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import java.util.GregorianCalendar;
+
 public class MainActivity extends AppCompatActivity implements
         SharedPreferences.OnSharedPreferenceChangeListener,
         ReminderDialogFragment.ReminderDialogListener{
@@ -134,7 +136,7 @@ public class MainActivity extends AppCompatActivity implements
         L.d(TAG, "onResume");
         if (tryPermission()) {
             MainService.init(getApplicationContext());
-            MainService.getSolarTimes(getApplicationContext());
+            MainService.getSolarTimes(getApplicationContext(), new GregorianCalendar());
         }
     }
 
