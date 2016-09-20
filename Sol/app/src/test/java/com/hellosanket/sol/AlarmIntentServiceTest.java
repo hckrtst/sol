@@ -28,6 +28,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
+import static junit.framework.Assert.assertNull;
 import static junit.framework.TestCase.assertEquals;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -150,7 +151,6 @@ public class AlarmIntentServiceTest {
         System.out.println("action = " + intent.getAction());
         //MatcherAssert.assertThat(intent.getClass(), is(Matchers.equalTo(MainService.class)));
         assertEquals(shadowIntent.getIntentClass(), MainService.class);
-        //Calendar c = intent.getParcelableExtra(MainService.ACTION_GET_SOLAR_TIMES_EXTRA_CAL);
         Bundle data = intent.getExtras();
         Calendar calendar = (Calendar) data.get(MainService.ACTION_GET_SOLAR_TIMES_EXTRA_CAL);
         System.out.println("Setting next alarm for " + sdf.format(calendar.getTime()));
@@ -159,6 +159,46 @@ public class AlarmIntentServiceTest {
         Calendar nextCal = dataHelper.getCalFor(CalendarDataHelper.sunrise_key);
         System.out.println("Next sunrise set for " + sdf.format(nextCal.getTime()));
         System.out.println("------------------------------------------------");
+    }
+
+    @Test
+    public void testAlarmCancellation() {
+        int offset = 20;
+
+        // initialize data with some future value
+        sunriseCal = new GregorianCalendar();
+        sunriseCal.add(Calendar.DATE, 1);
+        sdf = new SimpleDateFormat("YYYY MM dd hh:mm a z");
+        System.out.println("Set mock initial sunrise time = " + sdf.format(sunriseCal.getTime()));
+        dataHelper.setCalFor(CalendarDataHelper.sunrise_key, sunriseCal);
+
+        sunsetCal = new GregorianCalendar();
+        sunsetCal.add(Calendar.DATE, 2);
+        System.out.println("Set mock initial sunset time = " + sdf.format(sunsetCal.getTime()));
+        dataHelper.setCalFor(CalendarDataHelper.sunset_key, sunsetCal);
+
+        setAlarm(offset, Constants.SolarEvents.SUNSET);
+        // peek so as to to keep it
+        ShadowAlarmManager.ScheduledAlarm scheduledAlarm = shadowAlarmManager.peekNextScheduledAlarm();
+        Calendar scheduledCal = new GregorianCalendar();
+        scheduledCal.setTimeInMillis(scheduledAlarm.triggerAtTime);
+
+        System.out.println("Set sunset alarm for = " + sdf.format(scheduledCal.getTime()));
+
+        Calendar expected = (Calendar) sunsetCal.clone();
+        expected.add(Calendar.MINUTE, -1*offset);
+
+        //ShadowPendingIntent shadowPendingIntent = shadowOf(scheduledAlarm.operation);
+        assertEquals(scheduledCal.getTime(), expected.getTime());
+
+        // now cancel it
+        cancelAlarm(Constants.SolarEvents.SUNSET);
+
+        // peek so as to to keep it
+        scheduledAlarm = shadowAlarmManager.getNextScheduledAlarm();
+
+        assertNull(scheduledAlarm);
+
     }
 
 
@@ -170,10 +210,19 @@ public class AlarmIntentServiceTest {
         service.onHandleIntent(intent);
     }
 
+    private void cancelAlarm(Constants.SolarEvents event) {
+        Intent intent = new Intent(context, AlarmIntentService.class);
+        intent.setAction(AlarmIntentService.ACTION_CLEAR);
+        intent.putExtra(AlarmIntentService.EXTRA_ALARM_TYPE, event);
+        service.onHandleIntent(intent);
+    }
+
     private void doNotification(Constants.SolarEvents event) {
         Intent intent = new Intent(context, AlarmIntentService.class);
         intent.setAction(AlarmIntentService.ACTION_SHOW);
         intent.putExtra(AlarmIntentService.EXTRA_ALARM_TYPE, Constants.SolarEvents.SUNRISE);
         service.onHandleIntent(intent);
     }
+
+
 }

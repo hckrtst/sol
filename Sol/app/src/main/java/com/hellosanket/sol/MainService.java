@@ -47,7 +47,8 @@ public class MainService extends Service {
 
                 // fetch the solar times based on location and time
                 if (mGClient.getLocation() != null) {
-                    Calendar calendar = intent.getParcelableExtra(ACTION_GET_SOLAR_TIMES_EXTRA_CAL);
+                    Bundle data = intent.getExtras();
+                    Calendar calendar = (Calendar) data.get(MainService.ACTION_GET_SOLAR_TIMES_EXTRA_CAL);
                     SolarDataIntentService.startComputeService(getApplicationContext(),
                             mGClient.getLocation(), calendar);
                 } else {

@@ -4,6 +4,7 @@ import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -48,7 +49,8 @@ public class SolarDataIntentService extends IntentService {
             final String action = intent.getAction();
             if (ACTION_COMPUTE.equals(action)) {
                 Location location = intent.getParcelableExtra(Constants.SOLAR_DATA_INTENT_LOC_EXTRA);
-                Calendar calendar = intent.getParcelableExtra(Constants.SOLAR_DATA_INTENT_CAL_EXTRA);
+                Bundle data = intent.getExtras();
+                Calendar calendar = (Calendar) data.get(MainService.ACTION_GET_SOLAR_TIMES_EXTRA_CAL);
                 try {
                     handleActionCompute(location, calendar, Constants.SolarEvents.SUNRISE);
                     handleActionCompute(location, calendar, Constants.SolarEvents.SUNSET);
@@ -97,7 +99,7 @@ public class SolarDataIntentService extends IntentService {
                 // if current time is past sunset time then re-compute next one
                 if (cal.compareTo(sunsetCal) == 1) {
                     cal.add(Calendar.DAY_OF_WEEK, 1);
-                    sunsetCal = calculator.getOfficialSunriseCalendarForDate(cal);
+                    sunsetCal = calculator.getOfficialSunsetCalendarForDate(cal);
                 }
                 String sunset = getPrettyTime(sunsetCal);
                 DataWrapper.saveString(getApplicationContext(),

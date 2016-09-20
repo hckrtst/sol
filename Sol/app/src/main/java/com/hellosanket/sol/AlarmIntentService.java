@@ -12,6 +12,7 @@ import android.media.RingtoneManager;
 import android.support.annotation.NonNull;
 import android.support.v7.app.NotificationCompat;
 
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -56,9 +57,7 @@ public class AlarmIntentService extends IntentService {
             final String action = intent.getAction();
             if (ACTION_ADD.equals(action)) {
                 int offset = intent.getIntExtra(EXTRA_OFFSET, -1);
-                Constants.SolarEvents alarmType = (Constants.SolarEvents) intent.getSerializableExtra(EXTRA_ALARM_TYPE);
-                // TODO error check alarmType
-                handleActionAdd(alarmType, offset);
+                handleActionAdd((Constants.SolarEvents) intent.getSerializableExtra(EXTRA_ALARM_TYPE), offset);
             } else if (ACTION_SHOW.equals(action)) {
                 Constants.SolarEvents evt = (Constants.SolarEvents) intent.getSerializableExtra(EXTRA_ALARM_TYPE);
                 switch (evt) {
@@ -86,8 +85,18 @@ public class AlarmIntentService extends IntentService {
                     default:
                         L.w(TAG, "cannot display for unknown type");
                 }
+            } else if (ACTION_CLEAR.equals(action)) {
+                handleActionClear((Constants.SolarEvents) intent.getSerializableExtra(EXTRA_ALARM_TYPE));
             }
         }
+    }
+
+    private void handleActionClear(Constants.SolarEvents alarmType) {
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        PendingIntent pendingIntent = getAlarmIntent(alarmType);
+        alarmManager.cancel(pendingIntent);
+
+        // TODO clear from storage
     }
 
     private void handleActionAdd(Constants.SolarEvents alarmType, int offset) {
@@ -172,21 +181,7 @@ public class AlarmIntentService extends IntentService {
             throw new IllegalArgumentException();
         }
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        PendingIntent pendingIntent = null;
-        Intent myIntent = new Intent(ACTION_SHOW);
-        myIntent.putExtra(EXTRA_ALARM_TYPE, evt);
-        switch (evt) {
-            case SUNRISE:
-                pendingIntent = PendingIntent.getService(getApplicationContext(),
-                    Constants.SUNRISE_ALARM_TOKEN, myIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-                break;
-            case SUNSET:
-               pendingIntent = PendingIntent.getService(getApplicationContext(),
-                        Constants.SUNSET_ALARM_TOKEN, myIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-                break;
-            default:
-                L.w(TAG, "Cannot set alarm of unknown type");
-        }
+        PendingIntent pendingIntent = getAlarmIntent(evt);
         if (pendingIntent != null) {
             // offset is subtracted to ensure alarm fires in advance
             cal.add(Calendar.MINUTE, -1*offset);
@@ -208,5 +203,24 @@ public class AlarmIntentService extends IntentService {
 
     private boolean isSunsetAlarmRepeating() {
         return true;
+    }
+
+    private final PendingIntent getAlarmIntent(Constants.SolarEvents evt) {
+        PendingIntent pendingIntent = null;
+        Intent myIntent = new Intent(ACTION_SHOW);
+        myIntent.putExtra(EXTRA_ALARM_TYPE, evt);
+        switch (evt) {
+            case SUNRISE:
+                pendingIntent = PendingIntent.getService(getApplicationContext(),
+                        Constants.SUNRISE_ALARM_TOKEN, myIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+                break;
+            case SUNSET:
+                pendingIntent = PendingIntent.getService(getApplicationContext(),
+                        Constants.SUNSET_ALARM_TOKEN, myIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+                break;
+            default:
+                L.w(TAG, "Cannot set alarm of unknown type");
+        }
+        return pendingIntent;
     }
 }
