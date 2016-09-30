@@ -70,7 +70,7 @@ public class AlarmIntentService extends IntentService {
                             cal.add(Calendar.DAY_OF_WEEK, 1);
                             MainService.getSolarTimes(getApplicationContext(), cal);
                             // FIXME use stored offset
-                            handleActionAdd(Constants.SolarEvents.SUNRISE, 15);
+                            handleActionAdd(Constants.SolarEvents.SUNRISE, 1);
                         }
                         break;
                     case SUNSET:
@@ -79,7 +79,7 @@ public class AlarmIntentService extends IntentService {
                             Calendar cal = new GregorianCalendar();
                             cal.add(Calendar.DAY_OF_WEEK, 1);
                             MainService.getSolarTimes(getApplicationContext(), cal);
-                            handleActionAdd(Constants.SolarEvents.SUNSET, 15);
+                            handleActionAdd(Constants.SolarEvents.SUNSET, 1);
                         }
                         break;
                     default:

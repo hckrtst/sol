@@ -59,6 +59,7 @@ public class AlarmIntentServiceTest {
         shadowAlarmManager = shadowOf(alarmManager);
         service = Robolectric.setupService(AlarmIntentService.class);
         dataHelper = CalendarDataHelper.getInstance();
+        sdf = new SimpleDateFormat("YYYY MM dd hh:mm a z");
 
 
         // TODO can we set shadow system clock?
@@ -105,7 +106,7 @@ public class AlarmIntentServiceTest {
         // initialize data with some future value
         sunriseCal = new GregorianCalendar();
         sunriseCal.add(Calendar.DATE, 1);
-        sdf = new SimpleDateFormat("YYYY MM dd hh:mm a z");
+
         System.out.println("Set mock initial sunrise time = " + sdf.format(sunriseCal.getTime()));
         dataHelper.setCalFor(CalendarDataHelper.sunrise_key, sunriseCal);
 
@@ -158,6 +159,34 @@ public class AlarmIntentServiceTest {
         System.out.println(">" + data);
         Calendar nextCal = dataHelper.getCalFor(CalendarDataHelper.sunrise_key);
         System.out.println("Next sunrise set for " + sdf.format(nextCal.getTime()));
+        System.out.println("------------------------------------------------");
+    }
+
+    @Test
+    public void testRepeatingSunsetAlarm() {
+        System.out.println("--------- testRepeatingSunsetAlarm ----------");
+        // initialize data with some past value
+        sunsetCal = new GregorianCalendar();
+        sunsetCal.add(Calendar.DATE, -1);
+        System.out.println("Set mock initial sunset time = " + sdf.format(sunsetCal.getTime()));
+        dataHelper.setCalFor(CalendarDataHelper.sunset_key, sunsetCal);
+
+        doNotification(Constants.SolarEvents.SUNSET);
+
+        // check that new intent sent for adding next alarm
+        ShadowService shadowService = new ShadowService();
+        Intent intent = shadowService.getNextStartedService();
+        ShadowIntent shadowIntent = shadowOf(intent);
+        System.out.println("action = " + intent.getAction());
+        //MatcherAssert.assertThat(intent.getClass(), is(Matchers.equalTo(MainService.class)));
+        assertEquals(shadowIntent.getIntentClass(), MainService.class);
+        Bundle data = intent.getExtras();
+        Calendar calendar = (Calendar) data.get(MainService.ACTION_GET_SOLAR_TIMES_EXTRA_CAL);
+        System.out.println("Setting next alarm for " + sdf.format(calendar.getTime()));
+        System.out.println();
+        System.out.println(">" + data);
+        Calendar nextCal = dataHelper.getCalFor(CalendarDataHelper.sunset_key);
+        System.out.println("Next sunset set for " + sdf.format(nextCal.getTime()));
         System.out.println("------------------------------------------------");
     }
 
