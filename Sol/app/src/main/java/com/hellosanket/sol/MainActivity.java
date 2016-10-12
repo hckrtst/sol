@@ -136,7 +136,7 @@ public class MainActivity extends AppCompatActivity implements
         L.d(TAG, "onResume");
         if (tryPermission()) {
             MainService.init(getApplicationContext());
-            MainService.getSolarTimes(getApplicationContext(), new GregorianCalendar());
+            MainService.refreshSolarTimes(getApplicationContext(), new GregorianCalendar());
         }
     }
 
@@ -212,7 +212,7 @@ public class MainActivity extends AppCompatActivity implements
             } else {
                 DataWrapper.saveInt(getApplicationContext(),
                         Constants.SOL_DB, Constants.SUNRISE_ALARM_OFFSET_KEY, -1);
-                // TODO clear alarm
+                AlarmIntentService.startActionClear(getApplicationContext(), Constants.SolarEvents.SUNRISE);
             }
         } else {
             mSunsetRemBtn.setChecked(enabled);
@@ -225,7 +225,7 @@ public class MainActivity extends AppCompatActivity implements
             } else {
                 DataWrapper.saveInt(getApplicationContext(),
                         Constants.SOL_DB, Constants.SUNSET_ALARM_OFFSET_KEY, -1);
-                // TODO clear alarm
+                AlarmIntentService.startActionClear(getApplicationContext(), Constants.SolarEvents.SUNSET);
             }
         }
     }

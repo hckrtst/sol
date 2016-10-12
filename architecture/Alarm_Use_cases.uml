@@ -1,0 +1,14 @@
+@startuml
+'actors
+
+participant MainActivity as maina
+participant MainService as mains
+participant AlarmIntentSvc as alarmsvc
+pariticpant SolarDataIntentSvc as solarsvc
+participant SunriseSunsetCalc as suncalc
+
+maina-->maina:onReminderSet()
+maina->alarmsvc:startActionAdd(SUNRISE/SUNSET, offset)
+
+
+@enduml

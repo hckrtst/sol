@@ -12,12 +12,9 @@ import android.media.RingtoneManager;
 import android.support.annotation.NonNull;
 import android.support.v7.app.NotificationCompat;
 
-import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.StringTokenizer;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
@@ -50,6 +47,13 @@ public class AlarmIntentService extends IntentService {
         context.startService(intent);
     }
 
+    public static void startActionClear(final Context context,
+                                        Constants.SolarEvents alarmType) {
+        Intent intent = new Intent(context, AlarmIntentService.class);
+        intent.setAction(ACTION_CLEAR);
+        intent.putExtra(EXTRA_ALARM_TYPE, alarmType);
+        context.startService(intent);
+    }
 
     @Override
     protected void onHandleIntent(Intent intent) {
@@ -68,9 +72,10 @@ public class AlarmIntentService extends IntentService {
                         if (isSunriseAlarmRepeating()) {
                             Calendar cal = new GregorianCalendar();
                             cal.add(Calendar.DAY_OF_WEEK, 1);
-                            MainService.getSolarTimes(getApplicationContext(), cal);
+                            // FIXME call new API instead
+                            //MainService.refreshSolarTimes(getApplicationContext(), cal);
                             // FIXME use stored offset
-                            handleActionAdd(Constants.SolarEvents.SUNRISE, 1);
+                            //handleActionAdd(Constants.SolarEvents.SUNRISE, 1);
                         }
                         break;
                     case SUNSET:
@@ -78,8 +83,9 @@ public class AlarmIntentService extends IntentService {
                         if (isSunsetAlarmRepeating()) {
                             Calendar cal = new GregorianCalendar();
                             cal.add(Calendar.DAY_OF_WEEK, 1);
-                            MainService.getSolarTimes(getApplicationContext(), cal);
-                            handleActionAdd(Constants.SolarEvents.SUNSET, 1);
+                            // FIXME call new API instead
+                            //MainService.refreshSolarTimes(getApplicationContext(), cal);
+                            //handleActionAdd(Constants.SolarEvents.SUNSET, 1);
                         }
                         break;
                     default:
@@ -95,7 +101,7 @@ public class AlarmIntentService extends IntentService {
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         PendingIntent pendingIntent = getAlarmIntent(alarmType);
         alarmManager.cancel(pendingIntent);
-
+        L.d(TAG, "Cleared type = " + alarmType);
         // TODO clear from storage
     }
 
