@@ -22,6 +22,8 @@ import java.util.GregorianCalendar;
  */
 public class AlarmIntentService extends IntentService {
     protected static final String ACTION_ADD = "com.hellosanket.sol.alarmsvc.ADD";
+    protected static final String ACTION_ADD_FROM_UI = "sol.alarmsvc.add.from.ui";
+    protected static final String ACTION_ADD_FROM_NOTIF = "sol.alarmsvc.add.from.notif";
     protected static final String ACTION_CLEAR = "com.hellosanket.sol.alarmsvc.CLEAR";
     protected static final String ACTION_SHOW = "com.hellosanket.sol.alarmsvc.SHOW";
     protected static final String EXTRA_OFFSET = "com.hellosanket.sol.extra.OFFSET";

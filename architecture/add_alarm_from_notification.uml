@@ -1,0 +1,33 @@
+@startuml
+
+title Notification Setting the next sunrise alarm
+
+' bells & whistles
+skinparam handwritten true
+skinparam defaultFontName "Courier"
+
+autonumber
+
+'actors
+participant AlarmManager as am
+participant MainService as mains
+participant AlarmIntentService as ais
+participant NotificationManager as nm
+participant SolarDataIntentService as sdis
+participant SunriseSunsetCalculator as calc
+
+am->ais:ACTION_SHOW\nSUNRISE
+ais<-->nm:notify()
+ais->mains:ACTION_COMPUTE_SUNRISE_FOR_NOTIF
+mains->mains:cal = new GregorianCalendar()
+mains->mains:cal = cal.add(DAY_OF_WEEK)
+note right of mains
+   We always want to get the next day's event
+end note
+mains->sdis:ACTION_COMPUTE_SUNRISE_FOR_NOTIF\ncal
+sdis->mains:RESULT_SUNRISE_FOR_NOTIF\nresult_cal
+mains->mains:apply user-selected offset to result_cal
+mains->ais:ACTION_ADD_SUNRISE_ALARM\nresult_cal
+ais<-->am:set()
+
+@enduml

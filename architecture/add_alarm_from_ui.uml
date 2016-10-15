@@ -1,0 +1,40 @@
+@startuml
+
+title Setting Sunrise reminder
+
+' bells & whistles
+skinparam handwritten true
+skinparam defaultFontName "Courier"
+
+autonumber
+
+'actors
+participant MainActivity as maina
+participant MainService as mains
+participant AlarmIntentService as ais
+participant SolarDataIntentService as sdis
+participant SunriseSunsetCalculator as calc
+participant AlarmManager as am
+
+->maina:onReminderSet()
+maina->mains:ACTION_GET_SUNRISE_FOR_REMINDER\nCalendar object
+mains->mains:cal = Calendar object from parcel
+mains->sdis:ACTION_COMPUTE_SUNRISE_FOR_REMINDER\ncal
+sdis<-->calc:getSunrise()
+sdis->mains:RESULT_SUNRISE_FOR_REMINDER\nresult_cal
+
+alt result_cal > cal
+   note right of mains
+      sunrise for given date is in the past
+   end note
+   mains->mains:cal = cal + 1 day
+   mains->sdis:ACTION_COMPUTE_SUNRISE_FOR_REMINDER\ncal
+   sdis<-->calc:getSunrise()
+   sdis->mains:RESULT_SUNRISE_FOR_REMINDER\nresult_cal
+end
+
+mains->mains:apply user-selected offset to result_cal
+mains->ais:ACTION_ADD_SUNRISE_ALARM\nresult_cal
+ais<-->am:set()
+
+@enduml
