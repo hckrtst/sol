@@ -206,12 +206,7 @@ public class MainActivity extends AppCompatActivity implements
             if (enabled) {
                 DataWrapper.saveInt(getApplicationContext(),
                         Constants.SOL_DB, Constants.SUNRISE_ALARM_OFFSET_KEY, offset);
-                /*AlarmIntentService.startActionAdd(getApplicationContext(),
-                        Constants.SolarEvents.SUNRISE,
-                        offset);
-                        */
-                // TODO call api in mainservice which first gets the sunrise time, and then
-                // appropriately adds for the correct date
+                MainService.addAlarmFromUi(getApplicationContext(), Constants.SolarEvents.SUNRISE);
 
             } else {
                 DataWrapper.saveInt(getApplicationContext(),
@@ -223,9 +218,8 @@ public class MainActivity extends AppCompatActivity implements
             if (enabled) {
                 DataWrapper.saveInt(getApplicationContext(),
                         Constants.SOL_DB, Constants.SUNSET_ALARM_OFFSET_KEY, offset);
-                AlarmIntentService.startActionAdd(getApplicationContext(),
-                        Constants.SolarEvents.SUNSET,
-                        offset);
+                MainService.addAlarmFromUi(getApplicationContext(), Constants.SolarEvents.SUNSET);
+
             } else {
                 DataWrapper.saveInt(getApplicationContext(),
                         Constants.SOL_DB, Constants.SUNSET_ALARM_OFFSET_KEY, -1);

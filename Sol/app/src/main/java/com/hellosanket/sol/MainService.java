@@ -25,6 +25,10 @@ import java.util.GregorianCalendar;
 public class MainService extends Service {
     private final static String TAG = "MainService";
     private GClient mGClient;
+    protected final static String ACTION_GET_SUNRISE_FOR_REMINDER = "sol.mainservice.sunrise_for_reminder";
+    protected final static String ACTION_GET_SUNSET_FOR_REMINDER = "sol.mainservice.sunset_for_reminder";
+    protected final static String ACTION_GET_SUNRISE_FOR_NOTIF = "sol.mainservice.sunrise_for_notif";
+    protected final static String ACTION_GET_SUNSET_FOR_NOTIF = "sol.mainservice.sunset_for_notif";
     public final static String ACTION_GET_SOLAR_TIMES = "sol.mainservice.get_solar_times";
     public final static String ACTION_LOC_PERM_GRANTED = "sol.mainservice.loc_perm_granted";
     public final static String ACTION_GET_SOLAR_TIMES_EXTRA_CAL = "sol.mainservice.get_solar_times.cal";
@@ -52,8 +56,9 @@ public class MainService extends Service {
             IntentFilter intentFilter = new IntentFilter();
             intentFilter.addAction(SolarDataIntentService.RESULT_SUNRISE);
             intentFilter.addAction(SolarDataIntentService.RESULT_SUNSET);
+            intentFilter.addAction(SolarDataIntentService.RESULT_SUNSET_FOR_REMINDER);
+            intentFilter.addAction(SolarDataIntentService.RESULT_SUNRISE_FOR_REMINDER);
             LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(mSolarDataReceiver, intentFilter);
-            L.d(TAG, "registered");
         }
         if (intent != null) {
             L.d(TAG, "Got intent = " + intent.getAction());
@@ -70,6 +75,18 @@ public class MainService extends Service {
                 }
             } else if (ACTION_LOC_PERM_GRANTED.equals(intent.getAction())) {
                 mGClient.build();
+            } else if (ACTION_GET_SUNRISE_FOR_REMINDER.equals(intent.getAction())) {
+                L.d(TAG, "sunrise for rem");
+                handleSunriseForReminder();
+            } else if (ACTION_GET_SUNSET_FOR_REMINDER.equals(intent.getAction())) {
+                L.d(TAG, "sunset for rem");
+                handleSunsetForReminder();
+            } else if (ACTION_GET_SUNRISE_FOR_NOTIF.equals(intent.getAction())) {
+                L.d(TAG, "sunrise for notif");
+                handleSunriseForNotif();
+            } else if (ACTION_GET_SUNSET_FOR_NOTIF.equals(intent.getAction())) {
+                L.d(TAG, "sunset for notif");
+                handleSunsetForNotif();
             }
         }
         return Service.START_NOT_STICKY;
@@ -93,6 +110,62 @@ public class MainService extends Service {
         intent.putExtra(ACTION_GET_SOLAR_TIMES_EXTRA_CAL, calendar);
         context.startService(intent);
 
+    }
+
+    protected static void addAlarmFromUi(Context context, Constants.SolarEvents event) {
+        Intent intent = new Intent(context, MainService.class);
+
+        switch (event) {
+            case SUNRISE:
+                intent.setAction(MainService.ACTION_GET_SUNRISE_FOR_REMINDER);
+                break;
+            case SUNSET:
+                intent.setAction(MainService.ACTION_GET_SUNSET_FOR_REMINDER);
+                break;
+        }
+
+        context.startService(intent);
+    }
+
+    protected static void addAlarmFromNotification(Context context, Constants.SolarEvents event) {
+        Intent intent = new Intent(context, MainService.class);
+
+        switch (event) {
+            case SUNRISE:
+                intent.setAction(MainService.ACTION_GET_SUNRISE_FOR_NOTIF);
+                break;
+            case SUNSET:
+                intent.setAction(MainService.ACTION_GET_SUNSET_FOR_NOTIF);
+                break;
+        }
+
+        context.startService(intent);
+    }
+
+
+    protected void handleSunriseForReminder() {
+        Calendar cal = new GregorianCalendar();
+        SolarDataIntentService.startComputeServiceForReminder(getApplicationContext(),
+                mGClient.getLocation(), cal, Constants.SolarEvents.SUNRISE);
+    }
+
+    protected void handleSunsetForReminder() {
+        Calendar cal = new GregorianCalendar();
+        SolarDataIntentService.startComputeServiceForReminder(getApplicationContext(),
+                mGClient.getLocation(), cal, Constants.SolarEvents.SUNSET);
+    }
+
+    protected void handleSunriseForNotif() {
+        Calendar cal = new GregorianCalendar();
+
+        SolarDataIntentService.startComputeServiceForNotif(getApplicationContext(),
+                mGClient.getLocation(), cal, Constants.SolarEvents.SUNRISE);
+    }
+
+    protected void handleSunsetForNotif() {
+        Calendar cal = new GregorianCalendar();
+        SolarDataIntentService.startComputeServiceForNotif(getApplicationContext(),
+                mGClient.getLocation(), cal, Constants.SolarEvents.SUNSET);
     }
 
     public static void init(Context context) {
@@ -147,8 +220,8 @@ public class MainService extends Service {
         }
 
         public synchronized Location getLocation() {
-            if ((ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) /*||
-                (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)*/) {
+            if ((ActivityCompat.checkSelfPermission(getApplicationContext(),
+                    Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)) {
                 L.w(TAG, "Bailed due to no permission");
                 return null;
             }
@@ -172,11 +245,10 @@ public class MainService extends Service {
                 String time = getPrettyTime(calendar);
 
                 if (intent.getAction().equals(SolarDataIntentService.RESULT_SUNRISE)) {
-                    L.d(TAG, "got sunrise time = " + time);
+                    L.d(TAG, "RESULT_SUNRISE: got sunrise time = " + time);
                     Calendar now = new GregorianCalendar();
                     L.d(TAG, "Now is = " + getPrettyTime(now));
                     if (now.compareTo(calendar) > 0) {
-                        L.d(TAG, "A>>>>>");
                         now.add(Calendar.DAY_OF_WEEK, 1);
                         L.d(TAG, "Now is updated to " + getPrettyTime(now));
                         //refreshSolarTimes(getApplicationContext(), now);
@@ -186,11 +258,10 @@ public class MainService extends Service {
                         DataWrapper.saveString(getApplicationContext(),
                                 Constants.SOL_DB, Constants.SUNRISE_TIME_TEXT_KEY, time);
                     }
-                } else {
-                    L.d(TAG, "got sunset time = " + time);
+                } else if (intent.getAction().equals(SolarDataIntentService.RESULT_SUNSET)) {
+                    L.d(TAG, "RESULT_SUNSET: got sunset time = " + time);
                     Calendar now = new GregorianCalendar();
                     if (now.compareTo(calendar) > 0) {
-                        L.d(TAG, "B>>>>>");
                         now.add(Calendar.DAY_OF_WEEK, 1);
                         //refreshSolarTimes(getApplicationContext(), now);
                         SolarDataIntentService.startComputeServiceByType(getApplicationContext(),
@@ -198,6 +269,69 @@ public class MainService extends Service {
                     } else {
                         DataWrapper.saveString(getApplicationContext(),
                                 Constants.SOL_DB, Constants.SUNSET_TIME_TEXT_KEY, time);
+                    }
+                } else if (intent.getAction().equals(SolarDataIntentService.RESULT_SUNRISE_FOR_REMINDER)) {
+                    L.d(TAG, "RESULT_SUNRISE_FOR_REMINDER: got sunrise time = " + time);
+                    Calendar now = new GregorianCalendar();
+                    L.d(TAG, "Now is = " + getPrettyTime(now));
+                    if (now.compareTo(calendar) > 0) {
+                        now.add(Calendar.DAY_OF_WEEK, 1);
+                        L.d(TAG, "Now is updated to " + getPrettyTime(now));
+                        SolarDataIntentService.startComputeServiceForReminder(getApplicationContext(),
+                                mGClient.getLocation(), now, Constants.SolarEvents.SUNRISE);
+                    } else {
+                        // Apply offset
+                        int offset = DataWrapper.readInt(getApplicationContext(), Constants.SOL_DB,
+                                Constants.SUNRISE_ALARM_OFFSET_KEY, -1);
+                        if (offset > 0) calendar.add(Calendar.MINUTE, -1 * offset);
+                        AlarmIntentService.startActionAdd(getApplicationContext(), Constants.SolarEvents.SUNRISE, calendar);
+                    }
+
+                } else if (intent.getAction().equals(SolarDataIntentService.RESULT_SUNSET_FOR_REMINDER)) {
+                    L.d(TAG, "RESULT_SUNSET_FOR_REMINDER: got sunset time = " + time);
+                    Calendar now = new GregorianCalendar();
+                    L.d(TAG, "Now is = " + getPrettyTime(now));
+                    if (now.compareTo(calendar) > 0) {
+                        now.add(Calendar.DAY_OF_WEEK, 1);
+                        L.d(TAG, "Now is updated to " + getPrettyTime(now));
+                        SolarDataIntentService.startComputeServiceForReminder(getApplicationContext(),
+                                mGClient.getLocation(), now, Constants.SolarEvents.SUNSET);
+                    } else {
+                        int offset = DataWrapper.readInt(getApplicationContext(), Constants.SOL_DB,
+                                Constants.SUNSET_ALARM_OFFSET_KEY, -1);
+                        if (offset > 0) calendar.add(Calendar.MINUTE, -1 * offset);
+                        AlarmIntentService.startActionAdd(getApplicationContext(), Constants.SolarEvents.SUNSET, calendar);
+                    }
+
+                } else if (intent.getAction().equals(SolarDataIntentService.RESULT_SUNRISE_FOR_NOTIF)) {
+                    L.d(TAG, "RESULT_SUNRISE_FOR_NOTIF: got sunrise time = " + time);
+                    Calendar now = new GregorianCalendar();
+                    L.d(TAG, "Now is = " + getPrettyTime(now));
+
+                    // Apply offset
+                    int offset = DataWrapper.readInt(getApplicationContext(), Constants.SOL_DB,
+                               Constants.SUNRISE_ALARM_OFFSET_KEY, -1);
+                    // if alarm is still active then repeat
+                    if (offset >= 0) {
+                        // always get for next day
+                        now.add(Calendar.DAY_OF_WEEK, 1);
+                        now.add(Calendar.MINUTE, -1 * offset);
+                        AlarmIntentService.startActionAdd(getApplicationContext(), Constants.SolarEvents.SUNRISE, now);
+                    }
+                } else if (intent.getAction().equals(SolarDataIntentService.RESULT_SUNSET_FOR_NOTIF)) {
+                    L.d(TAG, "RESULT_SUNSET_FOR_NOTIF: got sunset time = " + time);
+                    Calendar now = new GregorianCalendar();
+                    L.d(TAG, "Now is = " + getPrettyTime(now));
+
+                    // Apply offset
+                    int offset = DataWrapper.readInt(getApplicationContext(), Constants.SOL_DB,
+                            Constants.SUNSET_ALARM_OFFSET_KEY, -1);
+                    // if alarm is still active then repeat
+                    if (offset >= 0) {
+                        // always get for next day
+                        now.add(Calendar.DAY_OF_WEEK, 1);
+                        now.add(Calendar.MINUTE, -1 * offset);
+                        AlarmIntentService.startActionAdd(getApplicationContext(), Constants.SolarEvents.SUNSET, now);
                     }
                 }
             }

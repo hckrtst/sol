@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.Context;
 import android.graphics.Color;
 import android.media.RingtoneManager;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.NotificationCompat;
 
@@ -22,11 +23,10 @@ import java.util.GregorianCalendar;
  */
 public class AlarmIntentService extends IntentService {
     protected static final String ACTION_ADD = "com.hellosanket.sol.alarmsvc.ADD";
-    protected static final String ACTION_ADD_FROM_UI = "sol.alarmsvc.add.from.ui";
-    protected static final String ACTION_ADD_FROM_NOTIF = "sol.alarmsvc.add.from.notif";
     protected static final String ACTION_CLEAR = "com.hellosanket.sol.alarmsvc.CLEAR";
     protected static final String ACTION_SHOW = "com.hellosanket.sol.alarmsvc.SHOW";
-    protected static final String EXTRA_OFFSET = "com.hellosanket.sol.extra.OFFSET";
+    //protected static final String EXTRA_OFFSET = "com.hellosanket.sol.extra.OFFSET";
+    protected static final String EXTRA_CAL = "com.hellosanket.sol.extra.cal";
     protected static final String EXTRA_ALARM_TYPE = "com.hellosanket.sol.extra.ALARM_TYPE";
     private final String TAG = "AlarmIntentSvc";
 
@@ -41,10 +41,10 @@ public class AlarmIntentService extends IntentService {
      */
     public static void startActionAdd(final Context context,
                                       Constants.SolarEvents alarmType,
-                                      int offset) {
+                                      Calendar calendar) {
         Intent intent = new Intent(context, AlarmIntentService.class);
         intent.setAction(ACTION_ADD);
-        intent.putExtra(EXTRA_OFFSET, offset);
+        intent.putExtra(EXTRA_CAL, calendar);
         intent.putExtra(EXTRA_ALARM_TYPE, alarmType);
         context.startService(intent);
     }
@@ -62,8 +62,12 @@ public class AlarmIntentService extends IntentService {
         if (intent != null) {
             final String action = intent.getAction();
             if (ACTION_ADD.equals(action)) {
-                int offset = intent.getIntExtra(EXTRA_OFFSET, -1);
-                handleActionAdd((Constants.SolarEvents) intent.getSerializableExtra(EXTRA_ALARM_TYPE), offset);
+                Bundle bundle = intent.getExtras();
+                if (bundle != null) {
+                    Calendar calendar = (Calendar) bundle.get(EXTRA_CAL);
+                    handleActionAdd((Constants.SolarEvents) intent.getSerializableExtra(EXTRA_ALARM_TYPE), calendar);
+                }
+
             } else if (ACTION_SHOW.equals(action)) {
                 Constants.SolarEvents evt = (Constants.SolarEvents) intent.getSerializableExtra(EXTRA_ALARM_TYPE);
                 switch (evt) {
@@ -107,25 +111,20 @@ public class AlarmIntentService extends IntentService {
         // TODO clear from storage
     }
 
-    private void handleActionAdd(Constants.SolarEvents alarmType, int offset) {
-        CalendarDataHelper dataHelper = CalendarDataHelper.getInstance();
-        Calendar now = Calendar.getInstance();
+    private void handleActionAdd(Constants.SolarEvents alarmType, Calendar calendar) {
         // FIXME need to check why roboelectric gets an exception when formatting with L
         //SimpleDateFormat sdf = new SimpleDateFormat("LLL dd hh:mm a z");
         SimpleDateFormat sdf = new SimpleDateFormat("MM dd hh:mm a z");
         try {
-            L.d(TAG, "Now is " + sdf.format(now.getTime()));
             switch (alarmType) {
                 case SUNRISE: {
-                    Calendar cal = dataHelper.getCalFor(CalendarDataHelper.sunrise_key);
-                    if (!scheduleAlarm(cal, offset, Constants.SolarEvents.SUNRISE)) {
+                    if (!scheduleAlarm(calendar, Constants.SolarEvents.SUNRISE)) {
                         L.e(TAG, "Failed to get sunrise cal object, no alarm set");
                     }
                     break;
                 }
                 case SUNSET: {
-                    Calendar cal = dataHelper.getCalFor(CalendarDataHelper.sunset_key);
-                    if (!scheduleAlarm(cal, offset, Constants.SolarEvents.SUNSET)) {
+                    if (!scheduleAlarm(calendar, Constants.SolarEvents.SUNSET)) {
                         L.e(TAG, "Failed to get sunset cal object, no alarm set");
                     }
                     break;
@@ -170,20 +169,17 @@ public class AlarmIntentService extends IntentService {
         notificationManager.notify(Constants.NOTIF_TOKEN, notifBuilder.build());
 
         // set tomorrow's alarm immediately
-        Calendar now = Calendar.getInstance();
-        SimpleDateFormat sdf = new SimpleDateFormat("dd hh:mm a z");
-        L.d(TAG, "Now is " + sdf.format(now.getTime()));
+        MainService.addAlarmFromNotification(getApplicationContext(), evt);
     }
 
     /**
      *
      * @param cal
-     * @param offset in minutes
      * @param evt
      * @return
      * @throws IllegalArgumentException
      */
-    private boolean scheduleAlarm(@NonNull Calendar cal, int offset,
+    private boolean scheduleAlarm(@NonNull Calendar cal,
                                   Constants.SolarEvents evt) throws IllegalArgumentException{
         if (cal == null) {
             throw new IllegalArgumentException();
@@ -191,8 +187,6 @@ public class AlarmIntentService extends IntentService {
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         PendingIntent pendingIntent = getAlarmIntent(evt);
         if (pendingIntent != null) {
-            // offset is subtracted to ensure alarm fires in advance
-            cal.add(Calendar.MINUTE, -1*offset);
             L.d(TAG, "Set alarm for " + getPrettyTime(cal));
             // We need to ensure alarm fires even if device not awake
             alarmManager.set(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), pendingIntent);
