@@ -25,10 +25,13 @@ import java.util.GregorianCalendar;
 public class MainService extends Service {
     private final static String TAG = "MainService";
     private GClient mGClient;
+    private static boolean DBG = false;
+
     protected final static String ACTION_GET_SUNRISE_FOR_REMINDER = "sol.mainservice.sunrise_for_reminder";
     protected final static String ACTION_GET_SUNSET_FOR_REMINDER = "sol.mainservice.sunset_for_reminder";
     protected final static String ACTION_GET_SUNRISE_FOR_NOTIF = "sol.mainservice.sunrise_for_notif";
     protected final static String ACTION_GET_SUNSET_FOR_NOTIF = "sol.mainservice.sunset_for_notif";
+
     public final static String ACTION_GET_SOLAR_TIMES = "sol.mainservice.get_solar_times";
     public final static String ACTION_LOC_PERM_GRANTED = "sol.mainservice.loc_perm_granted";
     public final static String ACTION_GET_SOLAR_TIMES_EXTRA_CAL = "sol.mainservice.get_solar_times.cal";
@@ -58,6 +61,8 @@ public class MainService extends Service {
             intentFilter.addAction(SolarDataIntentService.RESULT_SUNSET);
             intentFilter.addAction(SolarDataIntentService.RESULT_SUNSET_FOR_REMINDER);
             intentFilter.addAction(SolarDataIntentService.RESULT_SUNRISE_FOR_REMINDER);
+            intentFilter.addAction(SolarDataIntentService.RESULT_SUNSET_FOR_NOTIF);
+            intentFilter.addAction(SolarDataIntentService.RESULT_SUNRISE_FOR_NOTIF);
             LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(mSolarDataReceiver, intentFilter);
         }
         if (intent != null) {
@@ -109,7 +114,6 @@ public class MainService extends Service {
         intent.setAction(MainService.ACTION_GET_SOLAR_TIMES);
         intent.putExtra(ACTION_GET_SOLAR_TIMES_EXTRA_CAL, calendar);
         context.startService(intent);
-
     }
 
     protected static void addAlarmFromUi(Context context, Constants.SolarEvents event) {
@@ -123,7 +127,6 @@ public class MainService extends Service {
                 intent.setAction(MainService.ACTION_GET_SUNSET_FOR_REMINDER);
                 break;
         }
-
         context.startService(intent);
     }
 
@@ -138,7 +141,6 @@ public class MainService extends Service {
                 intent.setAction(MainService.ACTION_GET_SUNSET_FOR_NOTIF);
                 break;
         }
-
         context.startService(intent);
     }
 
@@ -202,6 +204,10 @@ public class MainService extends Service {
             L.d(TAG, "Connected to google api service");
             MainService.refreshSolarTimes(getApplicationContext(), new GregorianCalendar());
 
+            // if any alarms were being added after notification and our connection was lost
+            // then we need to do the due diligence of finishing what we started
+            addAlarmFromNotification(getApplicationContext(), Constants.SolarEvents.SUNRISE);
+            addAlarmFromNotification(getApplicationContext(), Constants.SolarEvents.SUNSET);
         }
 
         @Override
@@ -225,9 +231,17 @@ public class MainService extends Service {
                 L.w(TAG, "Bailed due to no permission");
                 return null;
             }
-            Location location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-            if (location == null ) L.e(TAG, "Location is null");
-            return location;
+            if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
+                Location location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+                if (location == null) L.e(TAG, "Location is null");
+                return location;
+            }
+
+            // Try to build connection again
+            L.w(TAG, "Connection to google play service not available!");
+            build();
+
+            return null;
         }
     }
 
@@ -313,9 +327,14 @@ public class MainService extends Service {
                                Constants.SUNRISE_ALARM_OFFSET_KEY, -1);
                     // if alarm is still active then repeat
                     if (offset >= 0) {
-                        // always get for next day
-                        now.add(Calendar.DAY_OF_WEEK, 1);
-                        now.add(Calendar.MINUTE, -1 * offset);
+                        if (DBG) {
+                            L.d(TAG, ">> test");
+                            now.add(Calendar.MINUTE, 2);
+                        } else {
+                            // always get for next day
+                            now.add(Calendar.DAY_OF_WEEK, 1);
+                            now.add(Calendar.MINUTE, -1 * offset);
+                        }
                         AlarmIntentService.startActionAdd(getApplicationContext(), Constants.SolarEvents.SUNRISE, now);
                     }
                 } else if (intent.getAction().equals(SolarDataIntentService.RESULT_SUNSET_FOR_NOTIF)) {
@@ -342,7 +361,5 @@ public class MainService extends Service {
             return simpleDateFormat.format(cal.getTime());
         }
     }
-
-
     /*******************/
 }

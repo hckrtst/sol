@@ -17,6 +17,7 @@
 package com.luckycatlabs.sunrisesunset;
 
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
 import com.luckycatlabs.sunrisesunset.calculator.SolarEventCalculator;
@@ -30,6 +31,8 @@ public class SunriseSunsetCalculator {
     private MyLocation location;
 
     private SolarEventCalculator calculator;
+
+    private final static boolean DBG = false;
 
     /**
      * Constructs a new <code>SunriseSunsetCalculator</code> with the given <code>MyLocation</code>
@@ -212,7 +215,13 @@ public class SunriseSunsetCalculator {
      * @return the official sunrise time as a Calendar
      */
     public Calendar getOfficialSunriseCalendarForDate(Calendar date) {
-        return calculator.computeSunriseCalendar(Zenith.OFFICIAL, date);
+        if (DBG) {
+            Calendar calendar = new GregorianCalendar();
+            calendar.add(Calendar.MINUTE, 2);
+            return calendar;
+        } else {
+            return calculator.computeSunriseCalendar(Zenith.OFFICIAL, date);
+        }
     }
 
     /**
