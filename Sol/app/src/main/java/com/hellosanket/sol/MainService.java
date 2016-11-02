@@ -319,38 +319,32 @@ public class MainService extends Service {
 
                 } else if (intent.getAction().equals(SolarDataIntentService.RESULT_SUNRISE_FOR_NOTIF)) {
                     L.d(TAG, "RESULT_SUNRISE_FOR_NOTIF: got sunrise time = " + time);
-                    Calendar now = new GregorianCalendar();
-                    L.d(TAG, "Now is = " + getPrettyTime(now));
-
                     // Apply offset
                     int offset = DataWrapper.readInt(getApplicationContext(), Constants.SOL_DB,
                                Constants.SUNRISE_ALARM_OFFSET_KEY, -1);
                     // if alarm is still active then repeat
                     if (offset >= 0) {
                         if (DBG) {
-                            L.d(TAG, ">> test");
-                            now.add(Calendar.MINUTE, 2);
+                            calendar = new GregorianCalendar();
+                            calendar.add(Calendar.MINUTE, 2);
                         } else {
                             // always get for next day
-                            now.add(Calendar.DAY_OF_WEEK, 1);
-                            now.add(Calendar.MINUTE, -1 * offset);
+                            calendar.add(Calendar.DAY_OF_WEEK, 1);
+                            calendar.add(Calendar.MINUTE, -1 * offset);
                         }
-                        AlarmIntentService.startActionAdd(getApplicationContext(), Constants.SolarEvents.SUNRISE, now);
+                        AlarmIntentService.startActionAdd(getApplicationContext(), Constants.SolarEvents.SUNRISE, calendar);
                     }
                 } else if (intent.getAction().equals(SolarDataIntentService.RESULT_SUNSET_FOR_NOTIF)) {
                     L.d(TAG, "RESULT_SUNSET_FOR_NOTIF: got sunset time = " + time);
-                    Calendar now = new GregorianCalendar();
-                    L.d(TAG, "Now is = " + getPrettyTime(now));
-
                     // Apply offset
                     int offset = DataWrapper.readInt(getApplicationContext(), Constants.SOL_DB,
                             Constants.SUNSET_ALARM_OFFSET_KEY, -1);
                     // if alarm is still active then repeat
                     if (offset >= 0) {
                         // always get for next day
-                        now.add(Calendar.DAY_OF_WEEK, 1);
-                        now.add(Calendar.MINUTE, -1 * offset);
-                        AlarmIntentService.startActionAdd(getApplicationContext(), Constants.SolarEvents.SUNSET, now);
+                        calendar.add(Calendar.DAY_OF_WEEK, 1);
+                        calendar.add(Calendar.MINUTE, -1 * offset);
+                        AlarmIntentService.startActionAdd(getApplicationContext(), Constants.SolarEvents.SUNSET, calendar);
                     }
                 }
             }
