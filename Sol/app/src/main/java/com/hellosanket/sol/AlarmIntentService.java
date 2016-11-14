@@ -133,7 +133,8 @@ public class AlarmIntentService extends IntentService {
                     L.e(TAG, "Invalid alarm type!");
             }
         }catch (NullPointerException e) {
-            L.e(TAG, "Whoops");
+            L.e(TAG, "Caught NullPointerException");
+            e.printStackTrace();
         }
     }
 

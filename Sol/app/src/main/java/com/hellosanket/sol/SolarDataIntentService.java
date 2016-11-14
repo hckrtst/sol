@@ -12,10 +12,15 @@ import android.support.v4.content.LocalBroadcastManager;
 import com.luckycatlabs.sunrisesunset.SunriseSunsetCalculator;
 import com.luckycatlabs.sunrisesunset.dto.MyLocation;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.SimpleTimeZone;
+
+import static com.hellosanket.sol.Constants.DBG;
+import static java.util.Calendar.AM;
 
 /**
  *
@@ -37,6 +42,8 @@ public class SolarDataIntentService extends IntentService {
 
     protected static final String RESULT_SUNSET_FOR_NOTIF = "sol.result.sunset_notif";
     protected static final String RESULT_SUNRISE_FOR_NOTIF = "sol.result.sunrise_notif";
+
+    protected final static String RESULT_LOCATION_MISSING = "sol.result.location_missing";
 
     private static final String TAG = "SolarDataIntentService";
     public SolarDataIntentService() {
@@ -167,6 +174,7 @@ public class SolarDataIntentService extends IntentService {
                     handleActionComputeForNotif(location, calendar, Constants.SolarEvents.SUNRISE);
                 } catch (NullPointerException e) {
                     L.e(TAG, "failed to get location");
+
                 }
             } else if (ACTION_COMPUTE_SUNSET_FOR_NOTIF.equals(intent.getAction())) {
                 Location location = intent.getParcelableExtra(Constants.SOLAR_DATA_INTENT_LOC_EXTRA);
@@ -187,7 +195,7 @@ public class SolarDataIntentService extends IntentService {
      * parameters.
      */
     private void handleActionCompute(@NonNull final Location location,
-                                     @Nullable Calendar eventCal,
+                                     @NonNull Calendar eventCal,
                                      final Constants.SolarEvents event) {
         MyLocation loc;
 
@@ -197,39 +205,16 @@ public class SolarDataIntentService extends IntentService {
             String timeZone = SimpleTimeZone.getDefault().getID();
             SunriseSunsetCalculator calculator = new SunriseSunsetCalculator(loc, timeZone);
             Calendar cal = eventCal;
-            L.d(TAG, ">>>>>>>>> handleActionCompute for date = " + getPrettyTime(cal));
+            L.d(TAG, "handleActionCompute for = " + getPrettyTime(cal));
             if (cal == null) {
                 L.w(TAG, "Cannot compute time for null calendar");
                 return;
             }
-
-            // FIXME this needs to be refactored
             if (event == Constants.SolarEvents.SUNRISE) {
                 Calendar sunriseCal = calculator.getOfficialSunriseCalendarForDate(cal);
-                // if current time is past sunrise time then re-compute next one
-                /*if (cal.compareTo(sunriseCal) == 1) {
-                    cal.add(Calendar.DAY_OF_WEEK, 1);
-                    sunriseCal = calculator.getOfficialSunriseCalendarForDate(cal);
-                }*/
-                String sunrise = getPrettyTime(sunriseCal);
-                /*DataWrapper.saveString(getApplicationContext(),
-                        Constants.SOL_DB, Constants.SUNRISE_TIME_TEXT_KEY, sunrise);
-                CalendarDataHelper dataHelper = CalendarDataHelper.getInstance();
-                dataHelper.setCalFor(CalendarDataHelper.sunrise_key, sunriseCal);*/
                 updateSunriseReceivers(RESULT_SUNRISE, sunriseCal);
-
             } else {
                 Calendar sunsetCal = calculator.getOfficialSunsetCalendarForDate(cal);
-                // if current time is past sunset time then re-compute next one
-                /*if (cal.compareTo(sunsetCal) == 1) {
-                    cal.add(Calendar.DAY_OF_WEEK, 1);
-                    sunsetCal = calculator.getOfficialSunsetCalendarForDate(cal);
-                }*/
-                String sunset = getPrettyTime(sunsetCal);
-                /*DataWrapper.saveString(getApplicationContext(),
-                        Constants.SOL_DB, Constants.SUNSET_TIME_TEXT_KEY, sunset);
-                CalendarDataHelper dataHelper = CalendarDataHelper.getInstance();
-                dataHelper.setCalFor(CalendarDataHelper.sunset_key, sunsetCal);*/
                 updateSunsetReceivers(RESULT_SUNSET, sunsetCal);
             }
         } catch (NullPointerException e) {
@@ -238,7 +223,7 @@ public class SolarDataIntentService extends IntentService {
     }
 
     private void handleActionComputeForReminder(@NonNull final Location location,
-                                     @Nullable Calendar cal,
+                                     @NonNull Calendar cal,
                                      final Constants.SolarEvents event) {
         MyLocation loc;
 
@@ -254,12 +239,12 @@ public class SolarDataIntentService extends IntentService {
             }
             if (event == Constants.SolarEvents.SUNRISE) {
                 Calendar sunriseCal = calculator.getOfficialSunriseCalendarForDate(cal);
-                L.d(TAG, "sunrise is at " + getPrettyTime(sunriseCal));
+                L.d(TAG, "sunrise = " + getPrettyTime(sunriseCal));
                 updateSunriseReceivers(RESULT_SUNRISE_FOR_REMINDER, sunriseCal);
 
             } else {
                 Calendar sunsetCal = calculator.getOfficialSunsetCalendarForDate(cal);
-                L.d(TAG, "sunset is at " + getPrettyTime(sunsetCal));
+                L.d(TAG, "sunset = " + getPrettyTime(sunsetCal));
                 updateSunsetReceivers(RESULT_SUNSET_FOR_REMINDER, sunsetCal);
             }
         } catch (NullPointerException e) {
@@ -268,7 +253,7 @@ public class SolarDataIntentService extends IntentService {
     }
 
     private void handleActionComputeForNotif(@NonNull final Location location,
-                                                @Nullable Calendar eventCal,
+                                                @NonNull Calendar eventCal,
                                                 final Constants.SolarEvents event) {
         MyLocation loc;
 
@@ -296,6 +281,7 @@ public class SolarDataIntentService extends IntentService {
             }
         } catch (NullPointerException e) {
             L.e(TAG, "Null location");
+            notifyReceiverAboutFailure(RESULT_LOCATION_MISSING);
         }
     }
 
@@ -309,14 +295,21 @@ public class SolarDataIntentService extends IntentService {
         Intent intent = new Intent(action);
         intent.putExtra("calendar", calendar);
         LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
-        L.d(TAG,"sent sunset time");
+        L.d(TAG,"updateSunsetReceivers");
     }
 
     private void updateSunriseReceivers(final String action, Calendar calendar) {
         Intent intent = new Intent(action);
         intent.putExtra("calendar", calendar);
         LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
-        L.d(TAG,"sent sunrise time");
+        L.d(TAG,"updateSunriseReceivers");
     }
+
+    private void notifyReceiverAboutFailure(final String action) {
+        Intent intent = new Intent(action);
+        LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
+        L.d(TAG, "notifyReceiverAboutFailure (" + action + ")");
+    }
+
 
 }

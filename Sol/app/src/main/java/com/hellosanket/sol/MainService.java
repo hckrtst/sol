@@ -22,10 +22,15 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
+import static com.hellosanket.sol.Constants.DBG;
+
 public class MainService extends Service {
+
+    /************************************************* Private **********************************/
     private final static String TAG = "MainService";
     private GClient mGClient;
-    private static boolean DBG = false;
+    private SolarDataReceiver mSolarDataReceiver;
+    private GooglePlayReceiver mGooglePlayReceiver;
 
     protected final static String ACTION_GET_SUNRISE_FOR_REMINDER = "sol.mainservice.sunrise_for_reminder";
     protected final static String ACTION_GET_SUNSET_FOR_REMINDER = "sol.mainservice.sunset_for_reminder";
@@ -35,18 +40,10 @@ public class MainService extends Service {
     public final static String ACTION_GET_SOLAR_TIMES = "sol.mainservice.get_solar_times";
     public final static String ACTION_LOC_PERM_GRANTED = "sol.mainservice.loc_perm_granted";
     public final static String ACTION_GET_SOLAR_TIMES_EXTRA_CAL = "sol.mainservice.get_solar_times.cal";
-    private SolarDataReceiver mSolarDataReceiver;
 
-    /*** private methods ***/
+    private final static String ACTION_PLAY_SVC_CONNECTED = "sol.mainservice.play_svc_connected";
 
-    /***********************/
-
-    /*** public methods ***/
-    public MainService() {
-        mGClient = new GClient();
-
-    }
-
+    /******************************************** Public *****************************************/
     @Override
     public IBinder onBind(Intent intent) {
         // TODO: Return the communication channel to the service.
@@ -63,8 +60,10 @@ public class MainService extends Service {
             intentFilter.addAction(SolarDataIntentService.RESULT_SUNRISE_FOR_REMINDER);
             intentFilter.addAction(SolarDataIntentService.RESULT_SUNSET_FOR_NOTIF);
             intentFilter.addAction(SolarDataIntentService.RESULT_SUNRISE_FOR_NOTIF);
+            intentFilter.addAction(SolarDataIntentService.RESULT_LOCATION_MISSING);
             LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(mSolarDataReceiver, intentFilter);
         }
+        if (mGooglePlayReceiver == null) mGooglePlayReceiver = new GooglePlayReceiver();
         if (intent != null) {
             L.d(TAG, "Got intent = " + intent.getAction());
             if (ACTION_GET_SOLAR_TIMES.equals(intent.getAction())) {
@@ -103,7 +102,20 @@ public class MainService extends Service {
 
     }
 
-    /** static public methods **/
+    public static void init(Context context) {
+        Intent intent = new Intent(context, MainService.class);
+        intent.setAction(MainService.ACTION_LOC_PERM_GRANTED);
+        context.startService(intent);
+
+        L.d(TAG, "Google play Availability = " +
+                GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context));
+    }
+
+    public MainService() {
+        mGClient = new GClient();
+    }
+
+    /******************************************** Protected ***************************************/
     protected static void refreshSolarTimes(Context context, Calendar calendar) {
         if (calendar == null) {
             L.d(TAG, "refreshSolarTimes: Calendar was null, send current");
@@ -159,27 +171,23 @@ public class MainService extends Service {
 
     protected void handleSunriseForNotif() {
         Calendar cal = new GregorianCalendar();
-
+        // We always get it for the next day
+        cal.add(Calendar.DAY_OF_WEEK, 1);
         SolarDataIntentService.startComputeServiceForNotif(getApplicationContext(),
                 mGClient.getLocation(), cal, Constants.SolarEvents.SUNRISE);
     }
 
     protected void handleSunsetForNotif() {
         Calendar cal = new GregorianCalendar();
+        // We always get it for the next day
+        cal.add(Calendar.DAY_OF_WEEK, 1);
         SolarDataIntentService.startComputeServiceForNotif(getApplicationContext(),
                 mGClient.getLocation(), cal, Constants.SolarEvents.SUNSET);
     }
 
-    public static void init(Context context) {
-        Intent intent = new Intent(context, MainService.class);
-        intent.setAction(MainService.ACTION_LOC_PERM_GRANTED);
-        context.startService(intent);
 
-        L.d(TAG, "Google play Availability = " +
-                GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context));
-    }
 
-    /** Inner Classes **/
+    /**************************************** Private ****************************************/
     private class GClient implements GoogleApiClient.OnConnectionFailedListener,
             GoogleApiClient.ConnectionCallbacks {
         private final static String TAG = "GClient";
@@ -204,10 +212,12 @@ public class MainService extends Service {
             L.d(TAG, "Connected to google api service");
             MainService.refreshSolarTimes(getApplicationContext(), new GregorianCalendar());
 
-            // if any alarms were being added after notification and our connection was lost
-            // then we need to do the due diligence of finishing what we started
-            addAlarmFromNotification(getApplicationContext(), Constants.SolarEvents.SUNRISE);
-            addAlarmFromNotification(getApplicationContext(), Constants.SolarEvents.SUNSET);
+            // If any alarms were being added after notification and our connection was lost
+            // then we need to do the due diligence of finishing what we started.
+            // Broadcast event to any listeners that connection is done
+            Intent intent = new Intent();
+            intent.setAction(ACTION_PLAY_SVC_CONNECTED);
+            LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
         }
 
         @Override
@@ -236,11 +246,6 @@ public class MainService extends Service {
                 if (location == null) L.e(TAG, "Location is null");
                 return location;
             }
-
-            // Try to build connection again
-            L.w(TAG, "Connection to google play service not available!");
-            build();
-
             return null;
         }
     }
@@ -253,10 +258,21 @@ public class MainService extends Service {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent != null) {
+
+                if (intent.getAction().equals(SolarDataIntentService.RESULT_LOCATION_MISSING)) {
+                    IntentFilter intentFilter = new IntentFilter();
+                    intentFilter.addAction(ACTION_PLAY_SVC_CONNECTED);
+                    if (mGooglePlayReceiver == null) mGooglePlayReceiver = new GooglePlayReceiver();
+                    LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(mGooglePlayReceiver, intentFilter);
+                    mGClient.build();
+                    L.d(TAG, "Retry connection to play service on RESULT_LOCATION_MISSING");
+                    return;
+                }
+
                 Bundle bundle = intent.getExtras();
+                String time = null;
                 Calendar calendar = (Calendar) bundle.get("calendar");
-                // TODO null check?
-                String time = getPrettyTime(calendar);
+                time = getPrettyTime(calendar);
 
                 if (intent.getAction().equals(SolarDataIntentService.RESULT_SUNRISE)) {
                     L.d(TAG, "RESULT_SUNRISE: got sunrise time = " + time);
@@ -328,8 +344,6 @@ public class MainService extends Service {
                             calendar = new GregorianCalendar();
                             calendar.add(Calendar.MINUTE, 2);
                         } else {
-                            // always get for next day
-                            calendar.add(Calendar.DAY_OF_WEEK, 1);
                             calendar.add(Calendar.MINUTE, -1 * offset);
                         }
                         AlarmIntentService.startActionAdd(getApplicationContext(), Constants.SolarEvents.SUNRISE, calendar);
@@ -341,8 +355,6 @@ public class MainService extends Service {
                             Constants.SUNSET_ALARM_OFFSET_KEY, -1);
                     // if alarm is still active then repeat
                     if (offset >= 0) {
-                        // always get for next day
-                        calendar.add(Calendar.DAY_OF_WEEK, 1);
                         calendar.add(Calendar.MINUTE, -1 * offset);
                         AlarmIntentService.startActionAdd(getApplicationContext(), Constants.SolarEvents.SUNSET, calendar);
                     }
@@ -355,5 +367,34 @@ public class MainService extends Service {
             return simpleDateFormat.format(cal.getTime());
         }
     }
-    /*******************/
+
+    private class GooglePlayReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(ACTION_PLAY_SVC_CONNECTED)) {
+                Calendar calendar = new GregorianCalendar();
+
+                if (isMorning(calendar)) {
+                    addAlarmFromNotification(getApplicationContext(),
+                            Constants.SolarEvents.SUNRISE);
+                    L.d(TAG, "GooglePlayReceiver adding sunrise alarm");
+                } else {
+                    addAlarmFromNotification(getApplicationContext(),
+                            Constants.SolarEvents.SUNSET);
+                    L.d(TAG, "GooglePlayReceiver adding sunset alarm");
+                }
+
+                // unregister until needed again so we don't keep setting
+                // the alarms randomly
+                LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(this);
+            }
+        }
+    }
+
+    private boolean isMorning(Calendar calendar) {
+        if (DBG) return true;
+        int now = calendar.get(Calendar.AM_PM);
+        if (now == Calendar.AM) return true;
+        return false;
+    }
 }

@@ -15,19 +15,53 @@ participant AlarmIntentService as ais
 participant NotificationManager as nm
 participant SolarDataIntentService as sdis
 participant SunriseSunsetCalculator as calc
+participant GooglePlayService as gps
 
 am->ais:ACTION_SHOW\nSUNRISE
 ais<-->nm:notify()
+note right of ais
+   Try to set the next alarm immediately
+end note
 ais->mains:ACTION_COMPUTE_SUNRISE_FOR_NOTIF
 mains->mains:cal = new GregorianCalendar()
-mains->mains:cal = cal.add(DAY_OF_WEEK)
+mains->mains:add DAY_OF_WEEK to cal
 note right of mains
    We always want to get the next day's event
 end note
 mains->sdis:ACTION_COMPUTE_SUNRISE_FOR_NOTIF\ncal
+alt Connection to Google Play Service broken and Location not available right now
+   sdis->mains:<b>ACTION_RESULT_LOCATION_MISSING
+   mains-->gps:GClient.build()
+   mains->mains:register(ACTION_PLAY_SVC_CONNECTED)
+   note over mains
+    We must wait for the connection to be re-established
+    before the next alarm can be set.
+    Wait for the connection.
+   end note
+   ...
+   ...
+   gps-->mains:onConnected()
+   note left of mains
+    Broadcast to all listeners
+   end note
+   mains-->mains:ACTION_PLAY_SVC_CONNECTED
+   mains->mains:unregister(ACTION_PLAY_SVC_CONNECTED)
+   mains->mains:cal = new GregorianCalendar()
+   mains->mains:add DAY_OF_WEEK to cal
+   note right of mains
+    We always want to get the next day's event
+   end note
+   alt is currently AM?
+    mains->sdis:ACTION_COMPUTE_SUNRISE_FOR_NOTIF\ncal
+   else
+    mains->sdis:ACTION_COMPUTE_SUNSET_FOR_NOTIF\ncal
+   end
+end
 sdis->mains:RESULT_SUNRISE_FOR_NOTIF\nresult_cal
 mains->mains:apply user-selected offset to result_cal
 mains->ais:ACTION_ADD_SUNRISE_ALARM\nresult_cal
 ais<-->am:set()
+
+
 
 @enduml

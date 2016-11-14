@@ -9,9 +9,9 @@ public final class L {
     final static boolean DBG = true;
 
     public static void d(String TAG, String msg) {
-        if (DBG) {
+        //if (DBG) {
             Log.d("Sol: " + TAG, msg);
-        }
+        //}
     }
 
     public static void w(String TAG, String msg) {

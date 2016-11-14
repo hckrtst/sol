@@ -25,4 +25,6 @@ public final class Constants {
       SUNSET
     };
 
+    public static final boolean DBG = false;
+
 }
